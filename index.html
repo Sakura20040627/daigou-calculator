@@ -2,173 +2,80 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>日本代购利润计算器</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>代购订单管理</title>
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;background:#f3f4f6;color:#111;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","Noto Sans SC",sans-serif;
-}
-.wrap{max-width:760px;margin:32px auto;padding:16px}
-.card{
-  background:#fff;border:1px solid #e5e7eb;border-radius:18px;
-  padding:26px;box-shadow:0 8px 28px rgba(0,0,0,.05)
-}
-h1{font-size:26px;margin:0 0 6px}
-.desc{font-size:14px;color:#6b7280;margin-bottom:22px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.field label{display:block;font-size:13px;color:#4b5563;margin:0 0 7px}
-.field input{
-  width:100%;padding:12px 13px;border:1px solid #d1d5db;border-radius:10px;
-  font-size:16px;background:#fff;color:#111;outline:none
-}
-.field input:focus{border-color:#6b7280}
-.result{margin-top:22px;padding:16px;border-radius:14px;background:#f8f8f8}
-.row{
-  display:flex;justify-content:space-between;gap:20px;
-  padding:9px 0;border-bottom:1px solid #e5e7eb;font-size:15px
-}
-.row:last-child{border-bottom:0}
-.row strong{white-space:nowrap}
-.total{font-size:18px;font-weight:700}
-.profit{font-size:19px;font-weight:800}
-.good{color:#b91c1c}
-.bad{color:#047857}
-.rules{
-  margin-top:18px;padding:14px 16px;background:#fafafa;border-radius:12px;
-  font-size:13px;line-height:1.8;color:#5b6470
-}
-.note{margin-top:10px;font-size:12px;color:#8a8f98}
-@media(max-width:600px){
-  .grid{grid-template-columns:1fr}
-  .card{padding:20px}
-  .wrap{margin:8px auto}
-}
+*{box-sizing:border-box} body{margin:0;background:#f4f5f7;color:#15171a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","Noto Sans SC",sans-serif}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.side{background:#16181d;color:#fff;padding:24px 16px}.brand{font-size:20px;font-weight:800;margin:0 8px 28px}.nav a{display:block;color:#cfd3da;text-decoration:none;padding:11px 12px;border-radius:9px;margin:5px 0}.nav a.active,.nav a:hover{background:#2a2d34;color:#fff}
+.main{padding:30px;max-width:1400px;width:100%}.head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.head h1{margin:0;font-size:27px}.muted{color:#747b86;font-size:13px}.btn{border:0;border-radius:9px;padding:11px 16px;font-weight:700;cursor:pointer;background:#15171a;color:#fff}.btn.secondary{background:#fff;color:#222;border:1px solid #d8dbe0}.btn.danger{background:#fff;color:#a61b1b;border:1px solid #e5caca;padding:7px 10px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{background:#fff;border:1px solid #e1e3e6;border-radius:13px;padding:18px}.stat .label{font-size:13px;color:#737984}.stat .num{font-size:25px;font-weight:800;margin-top:7px}.red{color:#b42318}.green{color:#067647}
+.panel{background:#fff;border:1px solid #e1e3e6;border-radius:13px;overflow:hidden}.toolbar{display:flex;gap:10px;padding:14px;border-bottom:1px solid #eceef0;flex-wrap:wrap}.toolbar input,.toolbar select,.modal input,.modal select,.modal textarea{border:1px solid #d7dbe0;border-radius:8px;padding:10px 11px;font:inherit;background:#fff}.toolbar input{min-width:230px}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1050px}th,td{text-align:left;padding:13px 14px;border-bottom:1px solid #eceef0;font-size:13px;vertical-align:middle}th{background:#fafafa;color:#69707b;font-weight:700}.status{padding:5px 8px;border-radius:999px;font-size:12px;display:inline-block}.s-pending{background:#fff5d6;color:#805b00}.s-buy{background:#eaf2ff;color:#2456a6}.s-ship{background:#eeeafd;color:#5b3ca5}.s-done{background:#e7f7ed;color:#167044}.s-cancel{background:#f2f2f2;color:#6b7280}.actions{display:flex;gap:6px}
+.empty{text-align:center;padding:48px;color:#8a9099}.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:20px}.modal{background:#fff;width:min(650px,100%);border-radius:15px;padding:22px;max-height:92vh;overflow:auto}.modal h2{margin:0 0 18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;font-size:12px;color:#69707b;margin-bottom:6px}.field.full{grid-column:1/-1}.field input,.field select,.field textarea{width:100%}.field textarea{min-height:82px;resize:vertical}.modalfoot{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.hint{font-size:12px;color:#858b94;margin-top:12px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:14px}.brand{margin:0 6px 10px}.nav{display:flex;gap:5px;overflow:auto}.nav a{white-space:nowrap}.main{padding:18px}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.stats{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.head{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <h1>日本代购利润计算器</h1>
-    <div class="desc">输入商品价格和交通费，自动计算客户付款、闲鱼扣费和你的净利润。</div>
+<div class="app">
+<aside class="side"><div class="brand">代购 ERP</div><nav class="nav"><a class="active" href="index.html">订单管理</a><a href="calculator.html">利润计算器</a></nav></aside>
+<main class="main">
+<div class="head"><div><h1>订单管理</h1><div class="muted">记录订单、完成状态和实际利润</div></div><button class="btn" onclick="openModal()">＋ 添加订单</button></div>
+<section class="stats">
+<div class="stat"><div class="label">累计订单</div><div class="num" id="totalOrders">0</div></div>
+<div class="stat"><div class="label">已完成订单</div><div class="num" id="doneOrders">0</div></div>
+<div class="stat"><div class="label">累计客户付款</div><div class="num" id="revenue">¥0.00</div></div>
+<div class="stat"><div class="label">累计净利润</div><div class="num red" id="profit">¥0.00</div></div>
+</section>
+<section class="panel">
+<div class="toolbar"><input id="search" placeholder="搜索商品、客户或备注…" oninput="render()"><select id="filter" onchange="render()"><option value="">全部状态</option><option>待购买</option><option>已购买</option><option>运输中</option><option>已完成</option><option>已取消</option></select><button class="btn secondary" onclick="exportData()">导出备份</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">导入备份</button><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div>
+<div class="tablewrap"><table><thead><tr><th>日期</th><th>商品 / 客户</th><th>商品价(JPY)</th><th>客户付款(CNY)</th><th>净利润(CNY)</th><th>状态</th><th>备注</th><th>操作</th></tr></thead><tbody id="tbody"></tbody></table><div class="empty" id="empty">还没有订单，点击“添加订单”开始记录。</div></div>
+</section>
+<div class="hint">数据目前保存在这台设备的浏览器中（localStorage）。清除浏览器数据或换设备不会自动同步，请定期“导出备份”。</div>
+</main></div>
 
-    <div class="grid">
-      <div class="field">
-        <label for="price">商品价格（日元）</label>
-        <input id="price" type="number" min="0" step="1" value="10000">
-      </div>
-      <div class="field">
-        <label for="transport">实际交通费（日元）</label>
-        <input id="transport" type="number" min="0" step="1" value="1000">
-      </div>
-      <div class="field">
-        <label for="sellRate">对客结算汇率（人民币 / 日元）</label>
-        <input id="sellRate" type="number" min="0" step="0.0001" value="0.045">
-      </div>
-      <div class="field">
-        <label for="costRate">你的实际换汇成本（人民币 / 日元）</label>
-        <input id="costRate" type="number" min="0" step="0.0001" value="0.0438">
-      </div>
-      <div class="field">
-        <label for="xianyuRate">闲鱼服务费率（%）</label>
-        <input id="xianyuRate" type="number" min="0" step="0.1" value="1.6">
-      </div>
-    </div>
-
-    <div class="result">
-      <div class="row"><span>商品折算</span><strong id="goodsRmb">¥0.00</strong></div>
-      <div class="row"><span>10% 代购费</span><strong id="serviceFee">¥0.00</strong></div>
-      <div class="row"><span>客户承担交通费</span><strong id="customerTraffic">¥0.00</strong></div>
-      <div class="row total"><span>客户总共支付</span><strong id="customerTotal">¥0.00</strong></div>
-
-      <div class="row"><span>闲鱼服务费</span><strong id="xianyuFee">¥0.00</strong></div>
-      <div class="row"><span>闲鱼扣费后到账</span><strong id="netReceived">¥0.00</strong></div>
-
-      <div class="row"><span>商品实际成本</span><strong id="goodsCost">¥0.00</strong></div>
-      <div class="row"><span>交通费实际成本</span><strong id="transportCost">¥0.00</strong></div>
-      <div class="row"><span>汇率差利润</span><strong id="fxProfit">¥0.00</strong></div>
-      <div class="row"><span>代购费利润</span><strong id="serviceProfit">¥0.00</strong></div>
-      <div class="row"><span>交通费盈亏</span><strong id="trafficProfit">¥0.00</strong></div>
-
-      <div class="row profit"><span>预计总利润</span><strong id="finalProfit">¥0.00</strong></div>
-      <div class="row"><span>利润率（利润 ÷ 客户付款）</span><strong id="profitRate">0.00%</strong></div>
-    </div>
-
-    <div class="rules">
-      <b>当前规则</b><br>
-      商品价格 ＜ 10,000 日元：客户承担全部交通费<br>
-      10,000 ≤ 商品价格 ＜ 20,000 日元：客户承担一半交通费<br>
-      商品价格 ≥ 20,000 日元：客户免交通费<br>
-      代购费：按商品对客折算金额的 10% 收取<br>
-      闲鱼服务费：按客户总付款金额 × 服务费率计算
-    </div>
-    <div class="note">说明：总利润 = 闲鱼扣费后到账 − 商品实际成本 − 交通费实际成本。</div>
-  </div>
+<div class="modalbg" id="modalbg"><div class="modal">
+<h2 id="modalTitle">添加订单</h2>
+<div class="formgrid">
+<div class="field"><label>订单日期</label><input id="date" type="date"></div>
+<div class="field"><label>完成状态</label><select id="status"><option>待购买</option><option>已购买</option><option>运输中</option><option>已完成</option><option>已取消</option></select></div>
+<div class="field"><label>商品名称</label><input id="product" placeholder="例如：限定玩偶"></div>
+<div class="field"><label>客户 / 闲鱼昵称</label><input id="customer" placeholder="可选"></div>
+<div class="field"><label>商品价格（日元）</label><input id="priceJPY" type="number" min="0" step="1" value="10000"></div>
+<div class="field"><label>实际交通费（日元）</label><input id="transportJPY" type="number" min="0" step="1" value="0"></div>
+<div class="field"><label>对客汇率（CNY/JPY）</label><input id="sellRate" type="number" min="0" step="0.0001" value="0.045"></div>
+<div class="field"><label>实际成本汇率（CNY/JPY）</label><input id="costRate" type="number" min="0" step="0.0001" value="0.0438"></div>
+<div class="field"><label>闲鱼服务费率（%）</label><input id="xianyuRate" type="number" min="0" step="0.1" value="1.6"></div>
+<div class="field"><label>代购费率（%）</label><input id="serviceRate" type="number" min="0" step="0.1" value="10"></div>
+<div class="field full"><label>备注</label><textarea id="note" placeholder="例如：客户要求周末发货、已收定金等"></textarea></div>
 </div>
-
+<div class="hint" id="preview">预计客户付款 ¥0.00 ｜ 预计净利润 ¥0.00</div>
+<div class="modalfoot"><button class="btn secondary" onclick="closeModal()">取消</button><button class="btn" onclick="saveOrder()">保存订单</button></div>
+</div></div>
 <script>
-(function(){
-  const $ = (id) => document.getElementById(id);
-  const money = (n) => "¥" + (Number.isFinite(n) ? n : 0).toFixed(2);
-
-  function calc(){
-    const price = Math.max(0, parseFloat($("price").value) || 0);
-    const transport = Math.max(0, parseFloat($("transport").value) || 0);
-    const sellRate = Math.max(0, parseFloat($("sellRate").value) || 0);
-    const costRate = Math.max(0, parseFloat($("costRate").value) || 0);
-    const xianyuRate = Math.max(0, parseFloat($("xianyuRate").value) || 0) / 100;
-
-    let customerTrafficJPY = 0;
-    if (price < 10000) {
-      customerTrafficJPY = transport;
-    } else if (price < 20000) {
-      customerTrafficJPY = transport / 2;
-    } else {
-      customerTrafficJPY = 0;
-    }
-
-    const goodsRmb = price * sellRate;
-    const serviceFee = goodsRmb * 0.10;
-    const customerTraffic = customerTrafficJPY * sellRate;
-    const customerTotal = goodsRmb + serviceFee + customerTraffic;
-
-    const xianyuFee = customerTotal * xianyuRate;
-    const netReceived = customerTotal - xianyuFee;
-
-    const goodsCost = price * costRate;
-    const transportCost = transport * costRate;
-
-    const fxProfit = price * (sellRate - costRate);
-    const serviceProfit = serviceFee;
-    const trafficProfit = customerTraffic - transportCost;
-
-    const finalProfit = netReceived - goodsCost - transportCost;
-    const profitRate = customerTotal > 0 ? finalProfit / customerTotal * 100 : 0;
-
-    $("goodsRmb").textContent = money(goodsRmb);
-    $("serviceFee").textContent = money(serviceFee);
-    $("customerTraffic").textContent = money(customerTraffic);
-    $("customerTotal").textContent = money(customerTotal);
-    $("xianyuFee").textContent = money(xianyuFee);
-    $("netReceived").textContent = money(netReceived);
-    $("goodsCost").textContent = money(goodsCost);
-    $("transportCost").textContent = money(transportCost);
-    $("fxProfit").textContent = money(fxProfit);
-    $("serviceProfit").textContent = money(serviceProfit);
-    $("trafficProfit").textContent = money(trafficProfit);
-    $("finalProfit").textContent = money(finalProfit);
-    $("profitRate").textContent = profitRate.toFixed(2) + "%";
-
-    $("finalProfit").className = finalProfit >= 0 ? "good" : "bad";
-  }
-
-  ["price","transport","sellRate","costRate","xianyuRate"].forEach(id => {
-    $(id).addEventListener("input", calc);
-  });
-
-  calc();
-})();
+const KEY='daigou_erp_orders_v1'; let editingId=null;
+const $=id=>document.getElementById(id); const money=n=>'¥'+(Number(n)||0).toFixed(2);
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}}
+function store(v){localStorage.setItem(KEY,JSON.stringify(v))}
+function calcOrder(){
+ const p=+($('priceJPY').value)||0,t=+($('transportJPY').value)||0,s=+($('sellRate').value)||0,c=+($('costRate').value)||0,x=(+($('xianyuRate').value)||0)/100,fee=(+($('serviceRate').value)||0)/100;
+ let ct=p<10000?t:p<20000?t/2:0; const goods=p*s,service=goods*fee,traffic=ct*s,total=goods+service+traffic,xy=total*x,net=total-xy,cost=p*c+t*c,profit=net-cost;
+ return {customerTotal:total,profit};
+}
+function updatePreview(){const r=calcOrder();$('preview').textContent=`预计客户付款 ${money(r.customerTotal)} ｜ 预计净利润 ${money(r.profit)}`}
+['priceJPY','transportJPY','sellRate','costRate','xianyuRate','serviceRate'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updatePreview()}));
+function openModal(o=null){editingId=o?.id||null;$('modalTitle').textContent=o?'编辑订单':'添加订单';$('date').value=o?.date||new Date().toISOString().slice(0,10);$('status').value=o?.status||'待购买';$('product').value=o?.product||'';$('customer').value=o?.customer||'';$('priceJPY').value=o?.priceJPY??10000;$('transportJPY').value=o?.transportJPY??0;$('sellRate').value=o?.sellRate??0.045;$('costRate').value=o?.costRate??0.0438;$('xianyuRate').value=o?.xianyuRate??1.6;$('serviceRate').value=o?.serviceRate??10;$('note').value=o?.note||'';updatePreview();$('modalbg').style.display='flex'}
+function closeModal(){$('modalbg').style.display='none';editingId=null}
+function saveOrder(){if(!$('product').value.trim()){alert('请填写商品名称');return}const r=calcOrder(),o={id:editingId||Date.now(),date:$('date').value,status:$('status').value,product:$('product').value.trim(),customer:$('customer').value.trim(),priceJPY:+$('priceJPY').value||0,transportJPY:+$('transportJPY').value||0,sellRate:+$('sellRate').value||0,costRate:+$('costRate').value||0,xianyuRate:+$('xianyuRate').value||0,serviceRate:+$('serviceRate').value||0,note:$('note').value.trim(),customerTotal:r.customerTotal,profit:r.profit};let a=load();const i=a.findIndex(v=>v.id===editingId);if(i>=0)a[i]=o;else a.unshift(o);store(a);closeModal();render()}
+function statusClass(s){return {'待购买':'s-pending','已购买':'s-buy','运输中':'s-ship','已完成':'s-done','已取消':'s-cancel'}[s]||''}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function render(){const all=load(),q=$('search').value.toLowerCase(),f=$('filter').value;const a=all.filter(o=>(!f||o.status===f)&&(!q||[o.product,o.customer,o.note].join(' ').toLowerCase().includes(q)));$('tbody').innerHTML=a.map(o=>`<tr><td>${esc(o.date)}</td><td><b>${esc(o.product)}</b><div class="muted">${esc(o.customer||'—')}</div></td><td>¥${Number(o.priceJPY).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="${o.profit>=0?'red':'green'}"><b>${money(o.profit)}</b></td><td><span class="status ${statusClass(o.status)}">${esc(o.status)}</span></td><td title="${esc(o.note)}">${esc(o.note||'—').slice(0,22)}</td><td><div class="actions"><button class="btn secondary" onclick="editOrder(${o.id})" style="padding:7px 10px">编辑</button><button class="btn danger" onclick="delOrder(${o.id})">删除</button></div></td></tr>`).join('');$('empty').style.display=a.length?'none':'block';
+ $('totalOrders').textContent=all.length;$('doneOrders').textContent=all.filter(o=>o.status==='已完成').length;
+ const valid=all.filter(o=>o.status!=='已取消');$('revenue').textContent=money(valid.reduce((s,o)=>s+(+o.customerTotal||0),0));const p=valid.reduce((s,o)=>s+(+o.profit||0),0);$('profit').textContent=money(p);$('profit').className='num '+(p>=0?'red':'green')}
+function editOrder(id){openModal(load().find(o=>o.id===id))}
+function delOrder(id){if(confirm('确定删除这笔订单吗？')){store(load().filter(o=>o.id!==id));render()}}
+function exportData(){const blob=new Blob([JSON.stringify(load(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='daigou-orders-backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;if(confirm(`将导入 ${d.length} 条订单并覆盖当前数据，继续吗？`)){store(d);render()}}catch{alert('备份文件格式不正确')}e.target.value=''};r.readAsText(file)}
+$('modalbg').addEventListener('click',e=>{if(e.target===$('modalbg'))closeModal()});render();
 </script>
-</body>
-</html>
+</body></html>
