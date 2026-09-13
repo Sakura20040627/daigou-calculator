@@ -3,123 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090b10">
+<meta name="theme-color" content="#0b0d12">
 <title>Daigou ERP</title>
 <style>
-:root{
- --bg:#090b10;--panel:#11151c;--panel2:#151a22;--line:#242b36;--text:#f6f7f9;--muted:#a0a7b3;
- --blue:#5b9cff;--green:#43d17d;--purple:#9a74ff;--orange:#ffad52;--red:#ff6b72
-}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text)}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
- -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-weight:500}
+:root{--bg:#0b0d12;--panel:#12161d;--panel2:#171c24;--line:#252c36;--text:#f5f7fa;--muted:#9aa3af;--blue:#5b9cff;--green:#42d37f;--orange:#ffad52;--red:#ff747b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 button,input,select,textarea{font:inherit}
-.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
-.sidebar{background:#0d1117;border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh}
-.brand{display:flex;align-items:center;gap:12px;padding:8px 8px 24px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#7bb7ff,#4c83ff);box-shadow:inset 0 1px rgba(255,255,255,.55)}
-.brand b{font-size:21px}.brand small{display:block;color:#7f8794;font-size:11px;margin-top:4px}
-.nav{display:grid;gap:6px}.nav button,.nav a{border:0;text-decoration:none;color:#cbd1db;background:transparent;padding:12px 13px;border-radius:12px;text-align:left;font-weight:600}
-.nav .active,.nav button:hover,.nav a:hover{background:#1b222d;color:#fff}.main{padding:28px;min-width:0}
-.top{display:flex;gap:16px;align-items:center;margin-bottom:20px}.hello{flex:1}.hello h1{font-size:28px;margin:0 0 5px}.hello p{margin:0;color:var(--muted);font-size:13px}
-.search{width:min(420px,40vw);background:#121821;border:1px solid var(--line);border-radius:13px;padding:12px 14px;color:#fff;outline:none}
-.btn{border:1px solid var(--line);background:#171d26;color:#eef2f7;padding:11px 15px;border-radius:12px;font-weight:700;cursor:pointer}.btn.primary{background:#f5f7fa;color:#0b0d11;border-color:#f5f7fa}.btn:hover{filter:brightness(1.08)}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px}.label{color:var(--muted);font-size:12px}.num{font-size:26px;font-weight:800;margin-top:8px}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 13px}.chip{border:1px solid var(--line);background:#121821;color:#aeb6c3;border-radius:999px;padding:8px 13px;font-weight:650}.chip.active{background:#e9edf4;color:#101319}
-.tablecard{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:1180px}
-th,td{padding:12px 13px;border-bottom:1px solid #202631;text-align:left;font-size:12px}th{color:#8992a0;background:#121720;font-weight:700}td{color:#d8dde5}
-.status{padding:5px 10px;border-radius:999px;display:inline-block;font-weight:700}.s1{background:#292d35;color:#c9cfd8}.s2{background:#173256;color:#77b3ff}.s3{background:#513516;color:#ffbd68}.s4{background:#32245b;color:#bba0ff}.s5{background:#163b29;color:#68e39b}.s6{background:#4b2226;color:#ff969d}
-.profit{color:#ff858b;font-weight:800}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px}.panel h3{margin:0 0 14px;font-size:14px}
-.logistics{display:grid;grid-template-columns:1fr auto;gap:9px}.logistics input{background:#0f141c;border:1px solid var(--line);border-radius:10px;padding:11px;color:#fff;outline:none}
-.trackbox{margin-top:12px;display:grid;gap:8px}.trackitem{padding:10px 11px;background:#0f141c;border:1px solid #202733;border-radius:10px}.trackitem b{display:block;font-size:12px}.trackitem span{color:#9099a7;font-size:11px}
-.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal{width:min(720px,100%);max-height:92vh;overflow:auto;background:#121720;border:1px solid #2b3441;border-radius:18px;padding:21px}.modal h2{margin-top:0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field.full{grid-column:1/-1}.field label{display:block;color:#9aa3b1;font-size:11px;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;background:#0d1219;border:1px solid #29313c;color:#fff;border-radius:10px;padding:11px;outline:none}.field textarea{min-height:78px}
-.foot{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.note{font-size:11px;color:#8c95a3;line-height:1.6}
-@media(max-width:950px){.app{grid-template-columns:1fr}.sidebar{height:auto;position:static}.nav{display:flex;overflow:auto}.cards{grid-template-columns:1fr 1fr}.top{flex-wrap:wrap}.search{width:100%}.bottom{grid-template-columns:1fr}}
-@media(max-width:560px){.main{padding:16px}.cards{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
+.side{border-right:1px solid var(--line);background:#0d1016;padding:24px 14px;position:sticky;top:0;height:100vh}
+.brand{padding:4px 8px 24px}.brand b{font-size:22px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+.nav{display:grid;gap:6px}.nav a{color:#c8ced8;text-decoration:none;padding:12px 13px;border-radius:11px;font-weight:650}.nav a.active,.nav a:hover{background:#1b212a;color:white}
+.main{padding:28px}.top{display:flex;align-items:center;gap:14px;margin-bottom:18px}.title{flex:1}.title h1{font-size:27px;margin:0 0 4px}.title p{margin:0;color:var(--muted);font-size:13px}
+.search{width:min(390px,38vw);background:#11161d;border:1px solid var(--line);color:white;border-radius:12px;padding:11px 13px;outline:none}
+.btn{border:1px solid var(--line);background:#171c24;color:#eef1f5;border-radius:11px;padding:10px 14px;font-weight:700;cursor:pointer}.btn.primary{background:white;color:#0b0d12;border-color:white}.btn:hover{filter:brightness(1.08)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:25px;margin-top:8px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chip{border:1px solid var(--line);background:#11161d;color:#aeb6c2;border-radius:999px;padding:8px 13px;font-weight:650;cursor:pointer}.chip.active{background:#edf1f6;color:#11151a}
+.tablebox{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}.wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:12px 13px;border-bottom:1px solid #202630;text-align:left;font-size:12px}th{background:#11161d;color:#87919d}td{color:#d6dbe3}
+.status{padding:5px 9px;border-radius:999px;font-weight:700;display:inline-block}.pending{background:#262b33;color:#cbd1d8}.bought{background:#183254;color:#7eb7ff}.jp{background:#4a3218;color:#ffc06d}.domestic{background:#312657;color:#bea8ff}.done{background:#173928;color:#70df9d}.cancel{background:#462329;color:#ff9ba1}
+.profit{color:#ff8b91;font-weight:800}
+.empty{padding:42px;text-align:center;color:#8e97a3}
+.trackpanel{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}.trackpanel h3{margin:0 0 10px;font-size:14px}.trackrow{display:flex;gap:8px}.trackrow input{flex:1;background:#0f141b;border:1px solid var(--line);color:white;border-radius:10px;padding:10px 12px}
+.note{color:#8f98a4;font-size:11px;line-height:1.6;margin-top:9px}
+.modalbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:18px;z-index:50}.modal{width:min(680px,100%);max-height:92vh;overflow:auto;background:#12161d;border:1px solid #2a323d;border-radius:18px;padding:20px}.modal h2{margin:0 0 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field.full{grid-column:1/-1}.field label{display:block;color:#98a1ad;font-size:11px;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;background:#0e1319;border:1px solid #29313c;color:white;border-radius:10px;padding:10px 11px}.field textarea{min-height:76px}.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.toast{display:none;position:fixed;right:20px;bottom:20px;background:#1f2630;color:white;border:1px solid #36404e;border-radius:10px;padding:10px 13px;font-size:12px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.side{height:auto;position:static}.nav{display:flex;overflow:auto}.main{padding:18px}.stats{grid-template-columns:1fr 1fr}.top{flex-wrap:wrap}.search{width:100%}}
+@media(max-width:560px){.stats{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.trackrow{flex-direction:column}}
 </style>
 </head>
 <body>
-<div class="app">
-<aside class="sidebar">
- <div class="brand"><div class="logo"></div><div><b>Daigou</b><small>Orders · Logistics · Profit</small></div></div>
- <div class="nav">
-  <button class="active">订单管理</button>
-  <a href="#calculator">利润计算器</a>
-  <button onclick="document.getElementById('tracking').scrollIntoView({behavior:'smooth'})">物流查询</button>
- </div>
+<div class="shell">
+<aside class="side">
+  <div class="brand"><b>Daigou</b><small>Orders · Profit · Logistics</small></div>
+  <nav class="nav">
+    <a class="active" href="index.html">订单管理</a>
+    <a href="calculator.html">代购计算器</a>
+  </nav>
 </aside>
 <main class="main">
- <div class="top"><div class="hello"><h1>代购订单管理</h1><p>订单、利润和中通国际物流统一管理</p></div><input class="search" id="search" placeholder="搜索订单、客户、商品、单号…" oninput="render()"><button class="btn primary" onclick="openModal()">＋ 新建订单</button></div>
+  <div class="top">
+    <div class="title"><h1>订单管理</h1><p>只保留订单、利润与物流三个核心功能</p></div>
+    <input class="search" id="search" placeholder="搜索商品、客户、订单号、快递单号…" oninput="render()">
+    <button class="btn primary" onclick="openModal()">＋ 新建订单</button>
+  </div>
 
- <div class="cards">
-  <div class="card"><div class="label">累计订单</div><div class="num" id="kOrders">0</div></div>
-  <div class="card"><div class="label">已完成</div><div class="num" id="kDone">0</div></div>
-  <div class="card"><div class="label">累计客户付款</div><div class="num" id="kRevenue">¥0.00</div></div>
-  <div class="card"><div class="label">累计净利润</div><div class="num" id="kProfit">¥0.00</div></div>
- </div>
+  <div class="stats">
+    <div class="stat"><span>累计订单</span><strong id="sOrders">0</strong></div>
+    <div class="stat"><span>已完成</span><strong id="sDone">0</strong></div>
+    <div class="stat"><span>累计客户付款</span><strong id="sRevenue">¥0.00</strong></div>
+    <div class="stat"><span>累计净利润</span><strong id="sProfit">¥0.00</strong></div>
+  </div>
 
- <div class="filters" id="filters"></div>
- <div class="tablecard"><div class="tablewrap"><table><thead><tr><th>订单号</th><th>日期</th><th>商品</th><th>客户</th><th>中通国际单号</th><th>客户付款(CNY)</th><th>净利润(CNY)</th><th>订单状态</th><th>物流状态</th><th>操作</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
+  <div class="toolbar" id="filters"></div>
 
- <div class="bottom">
-  <section class="panel" id="tracking"><h3>中通国际物流查询</h3>
-   <div class="logistics"><input id="trackNo" placeholder="输入中通国际运单号"><button class="btn" onclick="queryTrack()">查询物流</button></div>
-   <div class="trackbox" id="trackResult"><div class="note">已预留中通国际官方 API 接口。拿到开放平台正式 API 凭证后，通过安全代理接入即可自动同步；不会把 appSecret 暴露在网页源码里。</div></div>
+  <div class="tablebox">
+    <div class="wrap">
+      <table>
+        <thead><tr><th>订单号</th><th>日期</th><th>商品</th><th>客户</th><th>商品价(JPY)</th><th>客户付款(CNY)</th><th>净利润</th><th>订单状态</th><th>中通国际单号</th><th>操作</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty">还没有订单，点击右上角“新建订单”。</div>
+    </div>
+  </div>
+
+  <section class="trackpanel">
+    <h3>中通国际物流查询</h3>
+    <div class="trackrow">
+      <input id="trackNo" placeholder="输入中通国际运单号">
+      <button class="btn" onclick="openOfficialTrack()">复制单号并打开官方查询</button>
+    </div>
+    <div class="note">目前不伪装成“站内自动查询”：没有中通国际开放平台 API 凭证时，网页无法可靠获取轨迹。这里会先复制单号，再打开中通国际官方查询页，你直接粘贴即可。官方查询支持按运单号查询最新物流。</div>
   </section>
-  <section class="panel" id="calculator"><h3>利润计算器</h3>
-   <div class="grid">
-    <div class="field"><label>商品价格（日元）</label><input id="cp" type="number" value="10000"></div>
-    <div class="field"><label>交通费（日元）</label><input id="ct" type="number" value="1000"></div>
-    <div class="field"><label>对客汇率</label><input id="cs" type="number" step="0.0001" value="0.045"></div>
-    <div class="field"><label>实际成本汇率</label><input id="cc" type="number" step="0.0001" value="0.0438"></div>
-    <div class="field"><label>闲鱼费率（%）</label><input id="cx" type="number" step="0.1" value="1.6"></div>
-    <div class="field"><label>预计净利润</label><input id="cprofit" readonly></div>
-   </div>
-  </section>
- </div>
- <p class="note">订单数据默认保存在当前浏览器 localStorage。建议定期导出备份，避免清缓存或换设备造成数据丢失。</p>
 </main>
 </div>
 
 <div class="modalbg" id="modalbg"><div class="modal">
- <h2 id="mtitle">新建订单</h2>
- <div class="grid">
-  <div class="field"><label>订单日期</label><input id="date" type="date"></div>
-  <div class="field"><label>状态</label><select id="status"><option>待购买</option><option>已购买</option><option>日本运输</option><option>已到手</option><option>已发国内</option><option>已完成</option><option>已取消</option></select></div>
-  <div class="field"><label>商品名称</label><input id="product"></div>
-  <div class="field"><label>客户 / 闲鱼昵称</label><input id="customer"></div>
-  <div class="field"><label>商品价格（日元）</label><input id="priceJPY" type="number" value="10000"></div>
-  <div class="field"><label>交通费（日元）</label><input id="transportJPY" type="number" value="0"></div>
-  <div class="field"><label>对客汇率</label><input id="sellRate" type="number" step="0.0001" value="0.045"></div>
-  <div class="field"><label>成本汇率</label><input id="costRate" type="number" step="0.0001" value="0.0438"></div>
-  <div class="field"><label>闲鱼费率（%）</label><input id="xianyuRate" type="number" step="0.1" value="1.6"></div>
-  <div class="field"><label>代购费率（%）</label><input id="serviceRate" type="number" step="0.1" value="10"></div>
-  <div class="field full"><label>中通国际运单号</label><input id="trackingNo" placeholder="可稍后补充"></div>
-  <div class="field full"><label>备注</label><textarea id="remark"></textarea></div>
- </div>
- <div class="foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveOrder()">保存</button></div>
+  <h2 id="mtitle">新建订单</h2>
+  <div class="grid">
+    <div class="field"><label>订单日期</label><input id="date" type="date"></div>
+    <div class="field"><label>状态</label><select id="status"><option>待购买</option><option>已购买</option><option>日本运输</option><option>已发国内</option><option>已完成</option><option>已取消</option></select></div>
+    <div class="field"><label>商品名称</label><input id="product"></div>
+    <div class="field"><label>客户 / 闲鱼昵称</label><input id="customer"></div>
+    <div class="field"><label>商品价格（日元）</label><input id="priceJPY" type="number" value="10000"></div>
+    <div class="field"><label>交通费（日元）</label><input id="transportJPY" type="number" value="0"></div>
+    <div class="field"><label>对客汇率</label><input id="sellRate" type="number" step="0.0001" value="0.045"></div>
+    <div class="field"><label>实际成本汇率</label><input id="costRate" type="number" step="0.0001" value="0.0438"></div>
+    <div class="field"><label>闲鱼费率（%）</label><input id="xianyuRate" type="number" step="0.1" value="1.6"></div>
+    <div class="field"><label>代购费率（%）</label><input id="serviceRate" type="number" step="0.1" value="10"></div>
+    <div class="field full"><label>中通国际运单号</label><input id="trackingNo"></div>
+    <div class="field full"><label>备注</label><textarea id="remark"></textarea></div>
+  </div>
+  <div class="foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveOrder()">保存</button></div>
 </div></div>
+<div class="toast" id="toast"></div>
 
 <script>
-const KEY='daigou_orders_v2', APIKEY='daigou_zto_proxy_url';
-let editing=null, currentFilter='全部';
+const KEY='daigou_orders_v3'; let editing=null, filter='全部';
 const $=id=>document.getElementById(id), money=n=>'¥'+(Number(n)||0).toFixed(2);
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}}
-function store(v){localStorage.setItem(KEY,JSON.stringify(v))}
-function calc(p,t,s,c,x,fee=10){let ct=p<10000?t:p<20000?t/2:0, goods=p*s, total=goods+goods*(fee/100)+ct*s, net=total-total*(x/100), profit=net-p*c-t*c;return {total,profit}}
-function renderFilters(){const sts=['全部','待购买','已购买','日本运输','已到手','已发国内','已完成','已取消'];$('filters').innerHTML=sts.map(s=>`<button class="chip ${currentFilter===s?'active':''}" onclick="currentFilter='${s}';renderFilters();render()">${s}</button>`).join('')}
-function badge(s){const m={'待购买':'s1','已购买':'s2','日本运输':'s3','已到手':'s4','已发国内':'s2','已完成':'s5','已取消':'s6'};return `<span class="status ${m[s]||'s1'}">${s}</span>`}
+function save(a){localStorage.setItem(KEY,JSON.stringify(a))}
+function calc(p,t,s,c,x,fee){let customerTraffic=p<10000?t:p<20000?t/2:0;const goods=p*s,total=goods+goods*(fee/100)+customerTraffic*s,net=total-total*(x/100),profit=net-p*c-t*c;return {total,profit}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function render(){const all=load(),q=$('search').value.toLowerCase(), rows=all.filter(o=>(currentFilter==='全部'||o.status===currentFilter)&&[o.id,o.product,o.customer,o.trackingNo,o.remark].join(' ').toLowerCase().includes(q));$('tbody').innerHTML=rows.map(o=>`<tr><td>${o.id}</td><td>${o.date}</td><td>${esc(o.product)}</td><td>${esc(o.customer||'—')}</td><td>${esc(o.trackingNo||'—')}</td><td>${money(o.customerTotal)}</td><td class="profit">${money(o.profit)}</td><td>${badge(o.status)}</td><td>${esc(o.logisticsStatus||'未同步')}</td><td><button class="btn" onclick="editOrder('${o.id}')">编辑</button></td></tr>`).join('');$('kOrders').textContent=all.length;$('kDone').textContent=all.filter(o=>o.status==='已完成').length;const valid=all.filter(o=>o.status!=='已取消');$('kRevenue').textContent=money(valid.reduce((s,o)=>s+(o.customerTotal||0),0));$('kProfit').textContent=money(valid.reduce((s,o)=>s+(o.profit||0),0))}
+function badge(s){const c={'待购买':'pending','已购买':'bought','日本运输':'jp','已发国内':'domestic','已完成':'done','已取消':'cancel'}[s]||'pending';return `<span class="status ${c}">${esc(s)}</span>`}
+function renderFilters(){const x=['全部','待购买','已购买','日本运输','已发国内','已完成','已取消'];$('filters').innerHTML=x.map(v=>`<button class="chip ${filter===v?'active':''}" onclick="filter='${v}';renderFilters();render()">${v}</button>`).join('')}
+function render(){const all=load(),q=$('search').value.toLowerCase(),rows=all.filter(o=>(filter==='全部'||o.status===filter)&&[o.id,o.product,o.customer,o.trackingNo,o.remark].join(' ').toLowerCase().includes(q));$('tbody').innerHTML=rows.map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.date)}</td><td>${esc(o.product)}</td><td>${esc(o.customer||'—')}</td><td>¥${Number(o.priceJPY||0).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="profit">${money(o.profit)}</td><td>${badge(o.status)}</td><td>${esc(o.trackingNo||'—')} ${o.trackingNo?`<button class="btn" style="padding:6px 8px;margin-left:5px" onclick="trackOrder('${esc(o.trackingNo)}')">查询</button>`:''}</td><td><button class="btn" onclick="editOrder('${esc(o.id)}')">编辑</button></td></tr>`).join('');$('empty').style.display=rows.length?'none':'block';$('sOrders').textContent=all.length;$('sDone').textContent=all.filter(o=>o.status==='已完成').length;const valid=all.filter(o=>o.status!=='已取消');$('sRevenue').textContent=money(valid.reduce((a,o)=>a+(o.customerTotal||0),0));$('sProfit').textContent=money(valid.reduce((a,o)=>a+(o.profit||0),0))}
 function openModal(o){editing=o?.id||null;$('mtitle').textContent=o?'编辑订单':'新建订单';$('date').value=o?.date||new Date().toISOString().slice(0,10);$('status').value=o?.status||'待购买';$('product').value=o?.product||'';$('customer').value=o?.customer||'';$('priceJPY').value=o?.priceJPY??10000;$('transportJPY').value=o?.transportJPY??0;$('sellRate').value=o?.sellRate??0.045;$('costRate').value=o?.costRate??0.0438;$('xianyuRate').value=o?.xianyuRate??1.6;$('serviceRate').value=o?.serviceRate??10;$('trackingNo').value=o?.trackingNo||'';$('remark').value=o?.remark||'';$('modalbg').style.display='flex'}
 function closeModal(){$('modalbg').style.display='none';editing=null}
-function saveOrder(){if(!$('product').value.trim())return alert('请填写商品名称');let a=load(), p=+$('priceJPY').value||0,t=+$('transportJPY').value||0,s=+$('sellRate').value||0,c=+$('costRate').value||0,x=+$('xianyuRate').value||0,fee=+$('serviceRate').value||0,r=calc(p,t,s,c,x,fee);let old=a.find(o=>o.id===editing),o={id:editing||('DG'+Date.now()),date:$('date').value,status:$('status').value,product:$('product').value.trim(),customer:$('customer').value.trim(),priceJPY:p,transportJPY:t,sellRate:s,costRate:c,xianyuRate:x,serviceRate:fee,trackingNo:$('trackingNo').value.trim(),remark:$('remark').value.trim(),customerTotal:r.total,profit:r.profit,logisticsStatus:old?.logisticsStatus||''};if(editing)a=a.map(v=>v.id===editing?o:v);else a.unshift(o);store(a);closeModal();render()}
+function saveOrder(){if(!$('product').value.trim())return alert('请填写商品名称');let a=load(),p=+$('priceJPY').value||0,t=+$('transportJPY').value||0,s=+$('sellRate').value||0,c=+$('costRate').value||0,x=+$('xianyuRate').value||0,f=+$('serviceRate').value||0,r=calc(p,t,s,c,x,f);const o={id:editing||('DG'+Date.now()),date:$('date').value,status:$('status').value,product:$('product').value.trim(),customer:$('customer').value.trim(),priceJPY:p,transportJPY:t,sellRate:s,costRate:c,xianyuRate:x,serviceRate:f,trackingNo:$('trackingNo').value.trim(),remark:$('remark').value.trim(),customerTotal:r.total,profit:r.profit};a=editing?a.map(v=>v.id===editing?o:v):[o,...a];save(a);closeModal();render()}
 function editOrder(id){openModal(load().find(o=>o.id===id))}
-async function queryTrack(no){no=(no||$('trackNo').value).trim();if(!no)return alert('请输入运单号');const proxy=localStorage.getItem(APIKEY)||'';if(!proxy){$('trackResult').innerHTML=`<div class="trackitem"><b>尚未配置官方 API 代理</b><span>中通国际官方开放平台需要企业认证和 API 凭证。静态 GitHub Pages 不能安全保存 appSecret，因此需要一个轻量代理；拿到凭证后把代理 URL 写入 ${APIKEY} 即可。</span></div><div style="margin-top:8px"><a class="btn" target="_blank" href="https://www.ztoglobal.com/trade?domain=hk&lang=zh&lggType=1">打开中通国际官方查询</a></div>`;return}
- $('trackResult').innerHTML='<div class="trackitem"><b>查询中…</b><span>'+esc(no)+'</span></div>';
- try{const res=await fetch(proxy+'?billCode='+encodeURIComponent(no));if(!res.ok)throw new Error('HTTP '+res.status);const d=await res.json();const items=d.result||d.data||[];let latest=Array.isArray(items)&&items.length?(items[0].desc||items[0].remark||items[0].scanType||'已获取轨迹'):'暂无轨迹';$('trackResult').innerHTML=(Array.isArray(items)?items.slice(0,8):[]).map(i=>`<div class="trackitem"><b>${esc(i.desc||i.remark||i.scanType||'物流节点')}</b><span>${esc(i.scanDate||i.time||i.scanTime||'')}</span></div>`).join('')||'<div class="trackitem"><b>'+esc(latest)+'</b></div>';let a=load(),changed=false;a=a.map(o=>{if(o.trackingNo===no){o.logisticsStatus=latest;changed=true}return o});if(changed){store(a);render()}}catch(e){$('trackResult').innerHTML=`<div class="trackitem"><b>查询失败</b><span>${esc(e.message)}</span></div>`}}
-['cp','ct','cs','cc','cx'].forEach(id=>$(id).addEventListener('input',()=>{const r=calc(+$('cp').value||0,+$('ct').value||0,+$('cs').value||0,+$('cc').value||0,+$('cx').value||0,10);$('cprofit').value=money(r.profit)}));
-renderFilters();render();$('cp').dispatchEvent(new Event('input'));
+async function copyTrack(no){try{await navigator.clipboard.writeText(no)}catch{}}
+function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',1800)}
+async function trackOrder(no){await copyTrack(no);toast('单号已复制，正在打开中通国际官方查询');window.open('https://online.ztoglobal.com/','_blank','noopener')}
+async function openOfficialTrack(){const no=$('trackNo').value.trim();if(!no)return alert('请输入运单号');trackOrder(no)}
+renderFilters();render();
 </script>
 </body>
 </html>
