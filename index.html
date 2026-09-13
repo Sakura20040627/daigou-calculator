@@ -3,79 +3,199 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>代购订单管理</title>
+<meta name="theme-color" content="#080a0f">
+<title>Daigou · 订单管理</title>
 <style>
-*{box-sizing:border-box} body{margin:0;background:#f4f5f7;color:#15171a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","Noto Sans SC",sans-serif}
-.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.side{background:#16181d;color:#fff;padding:24px 16px}.brand{font-size:20px;font-weight:800;margin:0 8px 28px}.nav a{display:block;color:#cfd3da;text-decoration:none;padding:11px 12px;border-radius:9px;margin:5px 0}.nav a.active,.nav a:hover{background:#2a2d34;color:#fff}
-.main{padding:30px;max-width:1400px;width:100%}.head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.head h1{margin:0;font-size:27px}.muted{color:#747b86;font-size:13px}.btn{border:0;border-radius:9px;padding:11px 16px;font-weight:700;cursor:pointer;background:#15171a;color:#fff}.btn.secondary{background:#fff;color:#222;border:1px solid #d8dbe0}.btn.danger{background:#fff;color:#a61b1b;border:1px solid #e5caca;padding:7px 10px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{background:#fff;border:1px solid #e1e3e6;border-radius:13px;padding:18px}.stat .label{font-size:13px;color:#737984}.stat .num{font-size:25px;font-weight:800;margin-top:7px}.red{color:#b42318}.green{color:#067647}
-.panel{background:#fff;border:1px solid #e1e3e6;border-radius:13px;overflow:hidden}.toolbar{display:flex;gap:10px;padding:14px;border-bottom:1px solid #eceef0;flex-wrap:wrap}.toolbar input,.toolbar select,.modal input,.modal select,.modal textarea{border:1px solid #d7dbe0;border-radius:8px;padding:10px 11px;font:inherit;background:#fff}.toolbar input{min-width:230px}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1050px}th,td{text-align:left;padding:13px 14px;border-bottom:1px solid #eceef0;font-size:13px;vertical-align:middle}th{background:#fafafa;color:#69707b;font-weight:700}.status{padding:5px 8px;border-radius:999px;font-size:12px;display:inline-block}.s-pending{background:#fff5d6;color:#805b00}.s-buy{background:#eaf2ff;color:#2456a6}.s-ship{background:#eeeafd;color:#5b3ca5}.s-done{background:#e7f7ed;color:#167044}.s-cancel{background:#f2f2f2;color:#6b7280}.actions{display:flex;gap:6px}
-.empty{text-align:center;padding:48px;color:#8a9099}.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:20px}.modal{background:#fff;width:min(650px,100%);border-radius:15px;padding:22px;max-height:92vh;overflow:auto}.modal h2{margin:0 0 18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;font-size:12px;color:#69707b;margin-bottom:6px}.field.full{grid-column:1/-1}.field input,.field select,.field textarea{width:100%}.field textarea{min-height:82px;resize:vertical}.modalfoot{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.hint{font-size:12px;color:#858b94;margin-top:12px}
-@media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:14px}.brand{margin:0 6px 10px}.nav{display:flex;gap:5px;overflow:auto}.nav a{white-space:nowrap}.main{padding:18px}.stats{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.stats{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.head{align-items:flex-start;flex-direction:column}}
+:root{
+  --bg:#080a0f;--bg2:#0d1118;--panel:rgba(20,25,34,.82);--panel2:rgba(28,34,45,.72);
+  --line:rgba(255,255,255,.075);--line2:rgba(255,255,255,.12);--text:#f5f7fb;--muted:#9299a8;
+  --blue:#4c8dff;--green:#38d47b;--purple:#8c5cff;--pink:#ff4aa2;--orange:#ff9d38;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--text);background:
+ radial-gradient(circle at 72% -5%,rgba(45,92,170,.16),transparent 30%),
+ radial-gradient(circle at 7% 18%,rgba(90,82,160,.10),transparent 26%),
+ linear-gradient(145deg,#0c1017 0%,#07090d 55%,#0a0d12 100%);
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+ min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:28px 15px 20px;border-right:1px solid var(--line);
+ background:linear-gradient(180deg,rgba(30,36,49,.82),rgba(12,16,23,.92));backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px)}
+.brand{display:flex;gap:14px;align-items:center;padding:0 6px 29px}
+.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(155deg,#75b8ff,#4784ff 70%);box-shadow:inset 0 1px rgba(255,255,255,.55),0 10px 28px rgba(48,115,255,.25);position:relative}
+.logo:after{content:"";position:absolute;top:4px;left:13px;width:16px;height:9px;border:1px solid rgba(255,255,255,.55);border-bottom:0;border-radius:9px 9px 0 0}
+.brand h1{font-size:22px;line-height:1;margin:0 0 7px;letter-spacing:-.5px}.brand p{margin:0;color:#8991a0;font-size:11px}
+.nav{display:flex;flex-direction:column;gap:6px}
+.nav a,.nav button{color:#d0d5df;text-decoration:none;border:0;background:transparent;display:flex;align-items:center;gap:13px;width:100%;padding:12px 13px;border-radius:13px;font-size:14px;text-align:left}
+.nav a:hover,.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav .active{color:#fff;background:linear-gradient(120deg,rgba(255,255,255,.17),rgba(255,255,255,.09));box-shadow:inset 0 1px rgba(255,255,255,.08)}
+.ico{width:20px;text-align:center;font-size:17px;opacity:.95}.nav .soon{margin-left:auto;font-size:9px;color:#788091}
+.sidefoot{position:absolute;left:26px;right:24px;bottom:22px;color:#78808e;font-size:11px;line-height:1.55}
+.quote{font-size:13px;color:#a9b0bd;margin-bottom:28px}
+.main{padding:31px 30px 28px;min-width:0}
+.topbar{display:grid;grid-template-columns:1fr minmax(330px,420px) auto;gap:18px;align-items:start;margin-bottom:27px}
+.hello h2{font-size:28px;letter-spacing:-.8px;margin:2px 0 5px}.hello p{margin:0;color:#a1a8b6;font-size:14px}
+.searchbox{height:46px;border:1px solid var(--line2);border-radius:13px;background:rgba(25,30,40,.67);display:flex;align-items:center;padding:0 14px;box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.searchbox input{background:none;border:0;outline:0;color:#fff;width:100%;font-size:13px;padding:0 10px}.searchbox input::placeholder{color:#737b8b}
+.key{font-size:11px;color:#8b92a0;background:rgba(255,255,255,.06);padding:5px 8px;border-radius:7px}
+.primary{height:46px;border:0;border-radius:13px;background:#f7f8fb;color:#0a0b0f;font-weight:700;padding:0 20px;box-shadow:0 8px 28px rgba(0,0,0,.32);white-space:nowrap}
+.primary:hover{background:#fff;transform:translateY(-1px)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.kpi{min-height:136px;border:1px solid var(--line);border-radius:15px;padding:18px 19px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(35,38,48,.88),rgba(23,27,35,.78));box-shadow:inset 0 1px rgba(255,255,255,.03),0 12px 38px rgba(0,0,0,.13)}
+.kpi:nth-child(1){background:linear-gradient(135deg,rgba(55,24,46,.58),rgba(23,27,35,.83))}
+.kpi:nth-child(2){background:linear-gradient(135deg,rgba(21,56,44,.54),rgba(23,27,35,.83))}
+.kpi:nth-child(3){background:linear-gradient(135deg,rgba(22,45,75,.62),rgba(23,27,35,.83))}
+.kpi:nth-child(4){background:linear-gradient(135deg,rgba(49,31,81,.61),rgba(23,27,35,.83))}
+.kpihead{display:flex;align-items:center;gap:11px;color:#aab0bc;font-size:12px}.kicon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:18px}
+.pink{background:rgba(255,74,162,.18);color:#ff65ae}.greenbg{background:rgba(56,212,123,.17);color:#49df89}.bluebg{background:rgba(76,141,255,.18);color:#5e9aff}.purplebg{background:rgba(140,92,255,.18);color:#9e77ff}
+.knum{font-size:25px;font-weight:750;margin:4px 0 0 49px;letter-spacing:-.45px}.ksub{font-size:11px;margin:9px 0 0 49px;color:#8f97a6}.ksub.good{color:#54d98f}.ksub.blue{color:#61a0ff}.ksub.purple{color:#ae87ff}.ksub.pink{color:#ff7fbb}
+.spark{position:absolute;right:17px;bottom:21px;width:47px;height:26px}
+.filters{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}.tabs{display:flex;padding:3px;border:1px solid var(--line2);border-radius:22px;background:rgba(15,18,24,.72);overflow:auto}
+.tab{border:0;background:transparent;color:#9299a7;border-radius:18px;padding:8px 17px;white-space:nowrap;font-size:12px}
+.tab.active{background:linear-gradient(#555b68,#3a3f49);color:#fff;box-shadow:inset 0 1px rgba(255,255,255,.17),0 3px 10px rgba(0,0,0,.28)}
+.filterspacer{flex:1}.select,.iconbtn,.ghost{height:39px;border:1px solid var(--line2);background:rgba(22,26,34,.75);color:#d6d9e1;border-radius:11px;padding:0 13px}
+.iconbtn{width:42px;padding:0}.ghost{display:flex;align-items:center;gap:7px}
+.tablecard{border:1px solid var(--line);border-radius:15px;background:rgba(12,16,22,.72);overflow:hidden;box-shadow:0 15px 45px rgba(0,0,0,.12)}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:1050px}.table th{font-size:11px;color:#7e8797;font-weight:600;text-align:left;padding:13px 14px;background:rgba(29,34,44,.66);border-bottom:1px solid var(--line)}
+.table td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.055);font-size:12px;color:#c6ccd7}.table tr:hover td{background:rgba(255,255,255,.025)}
+.check{width:16px;height:16px;border:1px solid #667080;border-radius:4px;background:transparent}.orderid{color:#aab3c1;font-variant-numeric:tabular-nums}.product{display:flex;align-items:center;gap:9px}.thumb{width:31px;height:31px;border-radius:7px;background:linear-gradient(145deg,#e9e2d8,#8a8178);display:grid;place-items:center;color:#111;font-size:12px;font-weight:800}
+.product b{color:#f2f4f8;font-weight:560}.moneyjpy,.moneycny{font-variant-numeric:tabular-nums}.profitv{color:#e6e9ef;font-weight:650}
+.badgev{display:inline-flex;align-items:center;padding:5px 11px;border-radius:999px;font-size:11px}.b-done{background:rgba(37,190,103,.20);color:#53e290}.b-domestic{background:rgba(53,145,255,.20);color:#68adff}.b-japan{background:rgba(255,151,45,.18);color:#ffae56}.b-bought{background:rgba(55,137,255,.17);color:#69a4ff}.b-pending{background:rgba(156,163,175,.12);color:#b3bac5}.b-arrived{background:rgba(142,92,246,.18);color:#ad89ff}.b-cancel{background:rgba(255,80,90,.14);color:#ff858b}
+.more{border:1px solid var(--line);background:#171c25;color:#b9c0cc;border-radius:8px;width:31px;height:29px}.tablefoot{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;color:#8c94a2;font-size:12px}
+.pages{display:flex;gap:7px;align-items:center}.page{width:28px;height:28px;border:0;border-radius:7px;background:transparent;color:#a7afbd}.page.active{background:linear-gradient(#777e89,#525762);color:#fff}
+.bottom{display:grid;grid-template-columns:1.05fr 1.05fr 1.15fr;gap:14px;margin-top:15px}.lower{min-height:190px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,rgba(18,23,30,.88),rgba(10,14,19,.82));padding:18px 20px}
+.lower h3{font-size:14px;margin:0 0 17px}.trendval{font-size:27px;font-weight:800}.subtext{font-size:12px;color:#8a92a0;margin-top:6px}.trendchart{margin-top:15px;height:55px}
+.dist{display:flex;align-items:center;gap:22px}.donut{width:118px;height:118px;border-radius:50%;background:conic-gradient(var(--green) 0 45%,var(--blue) 45% 65%,var(--orange) 65% 78%,var(--purple) 78% 88%,#3776e9 88% 94%,#64748b 94%);position:relative;flex:0 0 auto}.donut:after{content:"";position:absolute;inset:16px;border-radius:50%;background:#11161d}.donutcenter{position:absolute;z-index:2;inset:0;display:grid;place-content:center;text-align:center;font-weight:750}.donutcenter small{color:#8f97a5;font-weight:500;font-size:10px}
+.legend{display:grid;gap:6px;font-size:11px;color:#aab1bd;flex:1}.leg{display:flex;align-items:center}.dot{width:8px;height:8px;border-radius:50%;margin-right:7px}.count{margin-left:auto;color:#d2d6de}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.qbtn{border:1px solid var(--line);background:linear-gradient(150deg,#1e2430,#161b24);color:#dce1e9;border-radius:10px;padding:11px 8px;font-size:11px}.qbtn:hover{border-color:rgba(255,255,255,.18);background:#242b37}
+.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal{width:min(720px,100%);max-height:92vh;overflow:auto;background:linear-gradient(155deg,rgba(35,40,50,.98),rgba(17,21,28,.99));border:1px solid rgba(255,255,255,.13);border-radius:20px;box-shadow:0 32px 100px rgba(0,0,0,.58);padding:23px}
+.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modalhead h3{margin:0;font-size:20px}.x{border:0;background:rgba(255,255,255,.06);color:#d7dce5;width:33px;height:33px;border-radius:9px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field.full{grid-column:1/-1}.field label{display:block;color:#939baa;font-size:11px;margin:0 0 6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line2);background:#11161f;color:#fff;border-radius:10px;padding:11px 12px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#477ed6;box-shadow:0 0 0 3px rgba(65,125,230,.12)}.field textarea{min-height:78px;resize:vertical}
+.preview{margin-top:14px;padding:12px 14px;border-radius:11px;background:rgba(79,141,255,.08);border:1px solid rgba(79,141,255,.16);color:#adc8f7;font-size:12px}.modalfoot{display:flex;justify-content:flex-end;gap:9px;margin-top:17px}.cancelbtn,.savebtn{border-radius:10px;padding:10px 16px}.cancelbtn{border:1px solid var(--line2);background:#181d26;color:#c9cfda}.savebtn{border:0;background:#f5f6f8;color:#111;font-weight:700}
+.menu{position:fixed;display:none;z-index:30;min-width:120px;background:#202630;border:1px solid var(--line2);border-radius:10px;padding:5px;box-shadow:0 18px 45px rgba(0,0,0,.45)}.menu button{display:block;width:100%;border:0;background:transparent;color:#dce0e7;text-align:left;padding:9px 10px;border-radius:7px;font-size:12px}.menu button:hover{background:rgba(255,255,255,.07)}.menu .danger{color:#ff878d}
+.toast{position:fixed;right:24px;bottom:24px;z-index:40;background:#252c37;color:#e8ebf0;border:1px solid var(--line2);padding:11px 14px;border-radius:11px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;font-size:12px}.toast.show{opacity:1;transform:none}
+@media(max-width:1180px){.cards{grid-template-columns:1fr 1fr}.bottom{grid-template-columns:1fr 1fr}.bottom .lower:last-child{grid-column:1/-1}}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;padding:16px}.brand{padding-bottom:12px}.nav{flex-direction:row;overflow:auto}.nav a,.nav button{width:auto;white-space:nowrap}.sidefoot{display:none}.main{padding:18px}.topbar{grid-template-columns:1fr auto}.searchbox{grid-column:1/-1;grid-row:2}.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.cards,.bottom{grid-template-columns:1fr}.bottom .lower:last-child{grid-column:auto}.topbar{grid-template-columns:1fr}.primary{width:100%}.searchbox{grid-column:auto;grid-row:auto}.main{padding:14px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.kpi{min-height:124px}}
 </style>
 </head>
 <body>
 <div class="app">
-<aside class="side"><div class="brand">代购 ERP</div><nav class="nav"><a class="active" href="index.html">订单管理</a><a href="calculator.html">利润计算器</a></nav></aside>
+<aside class="sidebar">
+  <div class="brand"><div class="logo"></div><div><h1>Daigou</h1><p>Orders · Calculator · Analytics</p></div></div>
+  <nav class="nav">
+    <a class="active" href="index.html"><span class="ico">▣</span>订单管理</a>
+    <a href="calculator.html"><span class="ico">▤</span>利润计算器</a>
+    <button onclick="toast('数据统计会在下一版继续扩展')"><span class="ico">⌁</span>数据统计<span class="soon">SOON</span></button>
+    <button onclick="toast('商品管理会在下一版继续扩展')"><span class="ico">▱</span>商品管理<span class="soon">SOON</span></button>
+    <button onclick="toast('客户管理会在下一版继续扩展')"><span class="ico">♙</span>客户管理<span class="soon">SOON</span></button>
+    <button onclick="toast('设置功能会在下一版继续扩展')"><span class="ico">⚙</span>设置<span class="soon">SOON</span></button>
+  </nav>
+  <div class="sidefoot"><div class="quote">“Buy what you love<br>Make it worthwhile.”</div><div>v2.0 · Dark Edition</div></div>
+</aside>
 <main class="main">
-<div class="head"><div><h1>订单管理</h1><div class="muted">记录订单、完成状态和实际利润</div></div><button class="btn" onclick="openModal()">＋ 添加订单</button></div>
-<section class="stats">
-<div class="stat"><div class="label">累计订单</div><div class="num" id="totalOrders">0</div></div>
-<div class="stat"><div class="label">已完成订单</div><div class="num" id="doneOrders">0</div></div>
-<div class="stat"><div class="label">累计客户付款</div><div class="num" id="revenue">¥0.00</div></div>
-<div class="stat"><div class="label">累计净利润</div><div class="num red" id="profit">¥0.00</div></div>
-</section>
-<section class="panel">
-<div class="toolbar"><input id="search" placeholder="搜索商品、客户或备注…" oninput="render()"><select id="filter" onchange="render()"><option value="">全部状态</option><option>待购买</option><option>已购买</option><option>运输中</option><option>已完成</option><option>已取消</option></select><button class="btn secondary" onclick="exportData()">导出备份</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">导入备份</button><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div>
-<div class="tablewrap"><table><thead><tr><th>日期</th><th>商品 / 客户</th><th>商品价(JPY)</th><th>客户付款(CNY)</th><th>净利润(CNY)</th><th>状态</th><th>备注</th><th>操作</th></tr></thead><tbody id="tbody"></tbody></table><div class="empty" id="empty">还没有订单，点击“添加订单”开始记录。</div></div>
-</section>
-<div class="hint">数据目前保存在这台设备的浏览器中（localStorage）。清除浏览器数据或换设备不会自动同步，请定期“导出备份”。</div>
-</main></div>
+  <div class="topbar">
+    <div class="hello"><h2>晚上好，👋</h2><p>让每一单都有价值。</p></div>
+    <label class="searchbox"><span>⌕</span><input id="search" placeholder="搜索订单、客户或商品…" oninput="render()"><span class="key">⌘ K</span></label>
+    <button class="primary" onclick="openModal()">＋&nbsp;&nbsp;新建订单</button>
+  </div>
+
+  <section class="cards">
+    <article class="kpi"><div class="kpihead"><span class="kicon pink">▰</span><span>累计订单</span></div><div class="knum" id="totalOrders">0</div><div class="ksub pink" id="monthOrderText">本月 +0</div><svg class="spark" viewBox="0 0 50 28"><path d="M2 25V19M12 25V13M22 25V17M32 25V8M43 25V3" stroke="#677080" stroke-width="5"/></svg></article>
+    <article class="kpi"><div class="kpihead"><span class="kicon greenbg">✓</span><span>已完成订单</span></div><div class="knum" id="doneOrders">0</div><div class="ksub good" id="completionText">0% 完成率</div><svg class="spark" viewBox="0 0 50 28"><path d="M2 25V19M12 25V13M22 25V17M32 25V8M43 25V3" stroke="#64707e" stroke-width="5"/></svg></article>
+    <article class="kpi"><div class="kpihead"><span class="kicon bluebg">¥</span><span>累计客户付款</span></div><div class="knum" id="revenue">¥0.00</div><div class="ksub blue" id="monthRevenueText">本月 ¥0.00</div><svg class="spark" viewBox="0 0 50 28"><polyline points="2,24 12,15 20,19 30,9 39,13 48,3" fill="none" stroke="#4c8dff" stroke-width="2"/></svg></article>
+    <article class="kpi"><div class="kpihead"><span class="kicon purplebg">≋</span><span>累计净利润</span></div><div class="knum" id="profit">¥0.00</div><div class="ksub purple" id="monthProfitText">本月 ¥0.00</div><svg class="spark" viewBox="0 0 50 28"><polyline points="2,24 12,16 22,19 31,11 39,12 48,3" fill="none" stroke="#8c5cff" stroke-width="2"/></svg></article>
+  </section>
+
+  <div class="filters">
+    <div class="tabs" id="tabs"></div><div class="filterspacer"></div>
+    <select class="select" id="sort" onchange="render()"><option value="date-desc">按下单时间</option><option value="profit-desc">利润最高</option><option value="price-desc">商品价最高</option></select>
+    <button class="iconbtn" onclick="document.getElementById('importFile').click()" title="导入">↥</button>
+    <button class="ghost" onclick="exportData()">⇩ <span>导出</span></button>
+    <input id="importFile" type="file" accept=".json" hidden onchange="importData(event)">
+  </div>
+
+  <section class="tablecard">
+    <div class="tablewrap"><table class="table">
+      <thead><tr><th><span class="check"></span></th><th>订单号</th><th>商品名称</th><th>客户 / 闲鱼昵称</th><th>下单日期</th><th>商品金额 (日元)</th><th>客户付款 (人民币)</th><th>净利润 (人民币)</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+    <div class="tablefoot"><span id="tableCount">共 0 条订单</span><div class="pages"><button class="page">‹</button><button class="page active">1</button><button class="page">2</button><button class="page">3</button><button class="page">›</button></div></div>
+  </section>
+
+  <section class="bottom">
+    <article class="lower"><h3>本月趋势</h3><div class="trendval" id="monthProfit">¥0.00</div><div class="subtext">本月净利润</div><div class="trendchart"><svg width="100%" height="55" viewBox="0 0 300 55" preserveAspectRatio="none"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38d47b" stop-opacity=".28"/><stop offset="1" stop-color="#38d47b" stop-opacity="0"/></linearGradient></defs><path id="trendArea" d="M0 50 L300 50 Z" fill="url(#g)"/><path id="trendLine" d="M0 45 L300 12" fill="none" stroke="#38d47b" stroke-width="2"/></svg></div></article>
+    <article class="lower"><h3>订单状态分布</h3><div class="dist"><div class="donut" id="donut"><div class="donutcenter"><span id="donutTotal">0</span><small>总订单</small></div></div><div class="legend" id="legend"></div></div></article>
+    <article class="lower"><h3>快速操作</h3><div class="quick"><button class="qbtn" onclick="openModal()">＋ 新建订单</button><button class="qbtn" onclick="exportData()">⇩ 导出数据</button><button class="qbtn" onclick="$('importFile').click()">↥ 导入数据</button><button class="qbtn" onclick="toast('商品管理会在下一版继续扩展')">◇ 商品管理</button><button class="qbtn" onclick="toast('客户管理会在下一版继续扩展')">♙ 客户管理</button><button class="qbtn" onclick="location.href='calculator.html'">▤ 利润计算器</button></div></article>
+  </section>
+</main>
+</div>
 
 <div class="modalbg" id="modalbg"><div class="modal">
-<h2 id="modalTitle">添加订单</h2>
-<div class="formgrid">
-<div class="field"><label>订单日期</label><input id="date" type="date"></div>
-<div class="field"><label>完成状态</label><select id="status"><option>待购买</option><option>已购买</option><option>运输中</option><option>已完成</option><option>已取消</option></select></div>
-<div class="field"><label>商品名称</label><input id="product" placeholder="例如：限定玩偶"></div>
-<div class="field"><label>客户 / 闲鱼昵称</label><input id="customer" placeholder="可选"></div>
-<div class="field"><label>商品价格（日元）</label><input id="priceJPY" type="number" min="0" step="1" value="10000"></div>
-<div class="field"><label>实际交通费（日元）</label><input id="transportJPY" type="number" min="0" step="1" value="0"></div>
-<div class="field"><label>对客汇率（CNY/JPY）</label><input id="sellRate" type="number" min="0" step="0.0001" value="0.045"></div>
-<div class="field"><label>实际成本汇率（CNY/JPY）</label><input id="costRate" type="number" min="0" step="0.0001" value="0.0438"></div>
-<div class="field"><label>闲鱼服务费率（%）</label><input id="xianyuRate" type="number" min="0" step="0.1" value="1.6"></div>
-<div class="field"><label>代购费率（%）</label><input id="serviceRate" type="number" min="0" step="0.1" value="10"></div>
-<div class="field full"><label>备注</label><textarea id="note" placeholder="例如：客户要求周末发货、已收定金等"></textarea></div>
-</div>
-<div class="hint" id="preview">预计客户付款 ¥0.00 ｜ 预计净利润 ¥0.00</div>
-<div class="modalfoot"><button class="btn secondary" onclick="closeModal()">取消</button><button class="btn" onclick="saveOrder()">保存订单</button></div>
+  <div class="modalhead"><h3 id="modalTitle">新建订单</h3><button class="x" onclick="closeModal()">×</button></div>
+  <div class="formgrid">
+    <div class="field"><label>下单日期</label><input id="date" type="date"></div>
+    <div class="field"><label>订单状态</label><select id="status"><option>待购买</option><option>已购买</option><option>日本运输</option><option>已到手</option><option>已发国内</option><option>已完成</option><option>已取消</option></select></div>
+    <div class="field"><label>商品名称</label><input id="product" placeholder="例如：Monchhichi 挂件"></div>
+    <div class="field"><label>客户 / 闲鱼昵称</label><input id="customer" placeholder="可选"></div>
+    <div class="field"><label>商品价格（日元）</label><input id="priceJPY" type="number" min="0" step="1" value="10000"></div>
+    <div class="field"><label>实际交通费（日元）</label><input id="transportJPY" type="number" min="0" step="1" value="0"></div>
+    <div class="field"><label>对客汇率（CNY / JPY）</label><input id="sellRate" type="number" min="0" step="0.0001" value="0.045"></div>
+    <div class="field"><label>实际成本汇率（CNY / JPY）</label><input id="costRate" type="number" min="0" step="0.0001" value="0.0438"></div>
+    <div class="field"><label>闲鱼服务费率（%）</label><input id="xianyuRate" type="number" min="0" step="0.1" value="1.6"></div>
+    <div class="field"><label>代购费率（%）</label><input id="serviceRate" type="number" min="0" step="0.1" value="10"></div>
+    <div class="field full"><label>备注</label><textarea id="note" placeholder="例如：客户要求周末发货 / 已收定金 / 特殊包装"></textarea></div>
+  </div>
+  <div class="preview" id="preview">预计客户付款 ¥0.00 · 预计净利润 ¥0.00</div>
+  <div class="modalfoot"><button class="cancelbtn" onclick="closeModal()">取消</button><button class="savebtn" onclick="saveOrder()">保存订单</button></div>
 </div></div>
+<div class="menu" id="menu"><button id="editMenu">编辑订单</button><button class="danger" id="deleteMenu">删除订单</button></div>
+<div class="toast" id="toast"></div>
+
 <script>
-const KEY='daigou_erp_orders_v1'; let editingId=null;
-const $=id=>document.getElementById(id); const money=n=>'¥'+(Number(n)||0).toFixed(2);
+const KEY='daigou_erp_orders_v1'; let editingId=null, activeStatus='', menuId=null;
+const $=id=>document.getElementById(id), money=n=>'¥'+(Number(n)||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}}
 function store(v){localStorage.setItem(KEY,JSON.stringify(v))}
+function normalizeStatus(s){return s==='运输中'?'日本运输':s}
+function orderNo(o){return o.orderNo||('DG'+String(o.date||'').replaceAll('-','')+String(o.id).slice(-3))}
 function calcOrder(){
- const p=+($('priceJPY').value)||0,t=+($('transportJPY').value)||0,s=+($('sellRate').value)||0,c=+($('costRate').value)||0,x=(+($('xianyuRate').value)||0)/100,fee=(+($('serviceRate').value)||0)/100;
- let ct=p<10000?t:p<20000?t/2:0; const goods=p*s,service=goods*fee,traffic=ct*s,total=goods+service+traffic,xy=total*x,net=total-xy,cost=p*c+t*c,profit=net-cost;
+ const p=+$('priceJPY').value||0,t=+$('transportJPY').value||0,s=+$('sellRate').value||0,c=+$('costRate').value||0,x=(+$('xianyuRate').value||0)/100,fee=(+$('serviceRate').value||0)/100;
+ const ct=p<10000?t:p<20000?t/2:0,goods=p*s,service=goods*fee,traffic=ct*s,total=goods+service+traffic,net=total-total*x,profit=net-p*c-t*c;
  return {customerTotal:total,profit};
 }
-function updatePreview(){const r=calcOrder();$('preview').textContent=`预计客户付款 ${money(r.customerTotal)} ｜ 预计净利润 ${money(r.profit)}`}
-['priceJPY','transportJPY','sellRate','costRate','xianyuRate','serviceRate'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updatePreview()}));
-function openModal(o=null){editingId=o?.id||null;$('modalTitle').textContent=o?'编辑订单':'添加订单';$('date').value=o?.date||new Date().toISOString().slice(0,10);$('status').value=o?.status||'待购买';$('product').value=o?.product||'';$('customer').value=o?.customer||'';$('priceJPY').value=o?.priceJPY??10000;$('transportJPY').value=o?.transportJPY??0;$('sellRate').value=o?.sellRate??0.045;$('costRate').value=o?.costRate??0.0438;$('xianyuRate').value=o?.xianyuRate??1.6;$('serviceRate').value=o?.serviceRate??10;$('note').value=o?.note||'';updatePreview();$('modalbg').style.display='flex'}
+function updatePreview(){const r=calcOrder();$('preview').textContent=`预计客户付款 ${money(r.customerTotal)} · 预计净利润 ${money(r.profit)}`}
+['priceJPY','transportJPY','sellRate','costRate','xianyuRate','serviceRate'].forEach(id=>$(id).addEventListener('input',updatePreview));
+function openModal(o=null){editingId=o?.id??null;$('modalTitle').textContent=o?'编辑订单':'新建订单';$('date').value=o?.date||new Date().toISOString().slice(0,10);$('status').value=normalizeStatus(o?.status)||'待购买';$('product').value=o?.product||'';$('customer').value=o?.customer||'';$('priceJPY').value=o?.priceJPY??10000;$('transportJPY').value=o?.transportJPY??0;$('sellRate').value=o?.sellRate??0.045;$('costRate').value=o?.costRate??0.0438;$('xianyuRate').value=o?.xianyuRate??1.6;$('serviceRate').value=o?.serviceRate??10;$('note').value=o?.note||'';updatePreview();$('modalbg').style.display='flex'}
 function closeModal(){$('modalbg').style.display='none';editingId=null}
-function saveOrder(){if(!$('product').value.trim()){alert('请填写商品名称');return}const r=calcOrder(),o={id:editingId||Date.now(),date:$('date').value,status:$('status').value,product:$('product').value.trim(),customer:$('customer').value.trim(),priceJPY:+$('priceJPY').value||0,transportJPY:+$('transportJPY').value||0,sellRate:+$('sellRate').value||0,costRate:+$('costRate').value||0,xianyuRate:+$('xianyuRate').value||0,serviceRate:+$('serviceRate').value||0,note:$('note').value.trim(),customerTotal:r.customerTotal,profit:r.profit};let a=load();const i=a.findIndex(v=>v.id===editingId);if(i>=0)a[i]=o;else a.unshift(o);store(a);closeModal();render()}
-function statusClass(s){return {'待购买':'s-pending','已购买':'s-buy','运输中':'s-ship','已完成':'s-done','已取消':'s-cancel'}[s]||''}
+function saveOrder(){if(!$('product').value.trim()){toast('请先填写商品名称');return}const r=calcOrder();let a=load();const old=a.find(v=>v.id===editingId);const id=editingId??Date.now();const o={id,orderNo:old?.orderNo||('DG'+$('date').value.replaceAll('-','')+String(id).slice(-3)),date:$('date').value,status:$('status').value,product:$('product').value.trim(),customer:$('customer').value.trim(),priceJPY:+$('priceJPY').value||0,transportJPY:+$('transportJPY').value||0,sellRate:+$('sellRate').value||0,costRate:+$('costRate').value||0,xianyuRate:+$('xianyuRate').value||0,serviceRate:+$('serviceRate').value||0,note:$('note').value.trim(),customerTotal:r.customerTotal,profit:r.profit};const i=a.findIndex(v=>v.id===id);i>=0?a[i]=o:a.unshift(o);store(a);closeModal();render();toast(i>=0?'订单已更新':'订单已创建')}
+function badge(s){return {'已完成':'b-done','已发国内':'b-domestic','日本运输':'b-japan','已购买':'b-bought','待购买':'b-pending','已到手':'b-arrived','已取消':'b-cancel'}[normalizeStatus(s)]||'b-pending'}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function render(){const all=load(),q=$('search').value.toLowerCase(),f=$('filter').value;const a=all.filter(o=>(!f||o.status===f)&&(!q||[o.product,o.customer,o.note].join(' ').toLowerCase().includes(q)));$('tbody').innerHTML=a.map(o=>`<tr><td>${esc(o.date)}</td><td><b>${esc(o.product)}</b><div class="muted">${esc(o.customer||'—')}</div></td><td>¥${Number(o.priceJPY).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="${o.profit>=0?'red':'green'}"><b>${money(o.profit)}</b></td><td><span class="status ${statusClass(o.status)}">${esc(o.status)}</span></td><td title="${esc(o.note)}">${esc(o.note||'—').slice(0,22)}</td><td><div class="actions"><button class="btn secondary" onclick="editOrder(${o.id})" style="padding:7px 10px">编辑</button><button class="btn danger" onclick="delOrder(${o.id})">删除</button></div></td></tr>`).join('');$('empty').style.display=a.length?'none':'block';
- $('totalOrders').textContent=all.length;$('doneOrders').textContent=all.filter(o=>o.status==='已完成').length;
- const valid=all.filter(o=>o.status!=='已取消');$('revenue').textContent=money(valid.reduce((s,o)=>s+(+o.customerTotal||0),0));const p=valid.reduce((s,o)=>s+(+o.profit||0),0);$('profit').textContent=money(p);$('profit').className='num '+(p>=0?'red':'green')}
-function editOrder(id){openModal(load().find(o=>o.id===id))}
-function delOrder(id){if(confirm('确定删除这笔订单吗？')){store(load().filter(o=>o.id!==id));render()}}
-function exportData(){const blob=new Blob([JSON.stringify(load(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='daigou-orders-backup.json';a.click();URL.revokeObjectURL(a.href)}
-function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;if(confirm(`将导入 ${d.length} 条订单并覆盖当前数据，继续吗？`)){store(d);render()}}catch{alert('备份文件格式不正确')}e.target.value=''};r.readAsText(file)}
-$('modalbg').addEventListener('click',e=>{if(e.target===$('modalbg'))closeModal()});render();
+function setStatus(s){activeStatus=s;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.status===s));render()}
+const statuses=['待购买','已购买','日本运输','已到手','已发国内','已完成'];
+function buildTabs(all){const counts={};all.forEach(o=>{const s=normalizeStatus(o.status);counts[s]=(counts[s]||0)+1});$('tabs').innerHTML=`<button class="tab ${activeStatus===''?'active':''}" data-status="" onclick="setStatus('')">全部 (${all.length})</button>`+statuses.map(s=>`<button class="tab ${activeStatus===s?'active':''}" data-status="${s}" onclick="setStatus('${s}')">${s} (${counts[s]||0})</button>`).join('')}
+function render(){
+ let all=load().map(o=>({...o,status:normalizeStatus(o.status)}));buildTabs(all);
+ const q=$('search').value.trim().toLowerCase();let a=all.filter(o=>(!activeStatus||o.status===activeStatus)&&(!q||[orderNo(o),o.product,o.customer,o.note].join(' ').toLowerCase().includes(q)));
+ const sort=$('sort').value;a.sort((x,y)=>sort==='profit-desc'?(y.profit||0)-(x.profit||0):sort==='price-desc'?(y.priceJPY||0)-(x.priceJPY||0):String(y.date).localeCompare(String(x.date)));
+ $('tbody').innerHTML=a.length?a.map(o=>`<tr><td><span class="check"></span></td><td class="orderid">${esc(orderNo(o))}</td><td><div class="product"><div class="thumb">${esc((o.product||'?')[0])}</div><b>${esc(o.product)}</b></div></td><td>${esc(o.customer||'—')}</td><td>${esc(o.date||'—')}</td><td class="moneyjpy">¥${Number(o.priceJPY||0).toLocaleString()}</td><td class="moneycny">${money(o.customerTotal)}</td><td class="profitv">${money(o.profit)}</td><td><span class="badgev ${badge(o.status)}">${esc(o.status)}</span></td><td><button class="more" onclick="openMenu(event,${o.id})">•••</button></td></tr>`).join(''):`<tr><td colspan="10" style="text-align:center;padding:45px;color:#737c8b">还没有订单，点击右上角“新建订单”开始记录。</td></tr>`;
+ $('tableCount').textContent=`共 ${a.length} 条订单`;
+ const valid=all.filter(o=>o.status!=='已取消'),done=all.filter(o=>o.status==='已完成'),now=new Date(),ym=now.toISOString().slice(0,7),month=valid.filter(o=>String(o.date||'').slice(0,7)===ym);
+ const rev=valid.reduce((s,o)=>s+(+o.customerTotal||0),0),profit=valid.reduce((s,o)=>s+(+o.profit||0),0),mrev=month.reduce((s,o)=>s+(+o.customerTotal||0),0),mprofit=month.reduce((s,o)=>s+(+o.profit||0),0);
+ $('totalOrders').textContent=all.length;$('doneOrders').textContent=done.length;$('revenue').textContent=money(rev);$('profit').textContent=money(profit);$('monthOrderText').textContent=`↑ +${month.length} 本月`;$('completionText').textContent=`↑ ${all.length?Math.round(done.length/all.length*100):0}% 完成率`;$('monthRevenueText').textContent=`↑ ${money(mrev)} 本月`;$('monthProfitText').textContent=`↑ ${money(mprofit)} 本月`;$('monthProfit').textContent=money(mprofit);$('donutTotal').textContent=all.length;
+ renderDistribution(all);renderTrend(month);
+}
+function renderDistribution(all){const colors={'已完成':'#38d47b','已发国内':'#4c8dff','日本运输':'#ff9d38','已到手':'#8c5cff','已购买':'#3776e9','待购买':'#64748b'};const counts={};statuses.forEach(s=>counts[s]=0);all.forEach(o=>{const s=normalizeStatus(o.status);if(counts[s]!==undefined)counts[s]++});const total=Math.max(1,statuses.reduce((n,s)=>n+counts[s],0));let cur=0,parts=[];statuses.forEach(s=>{const next=cur+counts[s]/total*100;parts.push(`${colors[s]} ${cur}% ${next}%`);cur=next});$('donut').style.background=`conic-gradient(${parts.join(',')})`;$('legend').innerHTML=statuses.map(s=>`<div class="leg"><span class="dot" style="background:${colors[s]}"></span>${s}<span class="count">${counts[s]}</span></div>`).join('')}
+function renderTrend(month){const arr=[0,0,0,0,0,0,0];month.forEach(o=>{const d=Math.min(6,Math.floor((new Date(o.date).getDate()-1)/5));arr[d]+=+o.profit||0});const max=Math.max(...arr,1),pts=arr.map((v,i)=>`${i*(300/6)},${50-v/max*42}`).join(' ');$('trendLine').setAttribute('d','M'+pts.replaceAll(' ',' L'));$('trendArea').setAttribute('d','M0 50 L'+pts.replaceAll(' ',' L')+' L300 50 Z')}
+function openMenu(e,id){e.stopPropagation();menuId=id;const m=$('menu'),r=e.currentTarget.getBoundingClientRect();m.style.left=Math.min(innerWidth-135,r.left-90)+'px';m.style.top=Math.min(innerHeight-90,r.bottom+5)+'px';m.style.display='block'}
+$('editMenu').onclick=()=>{const o=load().find(v=>v.id===menuId);$('menu').style.display='none';if(o)openModal(o)};$('deleteMenu').onclick=()=>{if(confirm('确定删除这笔订单吗？')){store(load().filter(v=>v.id!==menuId));render();toast('订单已删除')}$('menu').style.display='none'};document.addEventListener('click',()=>{$('menu').style.display='none'});$('modalbg').addEventListener('click',e=>{if(e.target===$('modalbg'))closeModal()});
+function exportData(){const blob=new Blob([JSON.stringify(load(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='daigou-orders-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);toast('备份已导出')}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;if(confirm(`将导入 ${d.length} 条订单并覆盖当前数据，继续吗？`)){store(d);render();toast('导入完成')}}catch{toast('备份文件格式不正确')}e.target.value=''};r.readAsText(f)}
+let tt;function toast(t){clearTimeout(tt);$('toast').textContent=t;$('toast').classList.add('show');tt=setTimeout(()=>$('toast').classList.remove('show'),1800)}
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('search').focus()}if(e.key==='Escape')closeModal()});
+render();
 </script>
 </body></html>
