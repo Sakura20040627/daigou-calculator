@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日本代购利润计算器</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#f3f4f6;color:#111;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+.wrap{max-width:760px;margin:32px auto;padding:16px}
+.card{
+  background:#fff;border:1px solid #e5e7eb;border-radius:18px;
+  padding:26px;box-shadow:0 8px 28px rgba(0,0,0,.05)
+}
+h1{font-size:26px;margin:0 0 6px}
+.desc{font-size:14px;color:#6b7280;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;font-size:13px;color:#4b5563;margin:0 0 7px}
+.field input{
+  width:100%;padding:12px 13px;border:1px solid #d1d5db;border-radius:10px;
+  font-size:16px;background:#fff;color:#111;outline:none
+}
+.field input:focus{border-color:#6b7280}
+.result{margin-top:22px;padding:16px;border-radius:14px;background:#f8f8f8}
+.row{
+  display:flex;justify-content:space-between;gap:20px;
+  padding:9px 0;border-bottom:1px solid #e5e7eb;font-size:15px
+}
+.row:last-child{border-bottom:0}
+.row strong{white-space:nowrap}
+.total{font-size:18px;font-weight:700}
+.profit{font-size:19px;font-weight:800}
+.good{color:#b91c1c}
+.bad{color:#047857}
+.rules{
+  margin-top:18px;padding:14px 16px;background:#fafafa;border-radius:12px;
+  font-size:13px;line-height:1.8;color:#5b6470
+}
+.note{margin-top:10px;font-size:12px;color:#8a8f98}
+@media(max-width:600px){
+  .grid{grid-template-columns:1fr}
+  .card{padding:20px}
+  .wrap{margin:8px auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>日本代购利润计算器</h1>
+    <div class="desc">输入商品价格和交通费，自动计算客户付款、闲鱼扣费和你的净利润。</div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="price">商品价格（日元）</label>
+        <input id="price" type="number" min="0" step="1" value="10000">
+      </div>
+      <div class="field">
+        <label for="transport">实际交通费（日元）</label>
+        <input id="transport" type="number" min="0" step="1" value="1000">
+      </div>
+      <div class="field">
+        <label for="sellRate">对客结算汇率（人民币 / 日元）</label>
+        <input id="sellRate" type="number" min="0" step="0.0001" value="0.045">
+      </div>
+      <div class="field">
+        <label for="costRate">你的实际换汇成本（人民币 / 日元）</label>
+        <input id="costRate" type="number" min="0" step="0.0001" value="0.0438">
+      </div>
+      <div class="field">
+        <label for="xianyuRate">闲鱼服务费率（%）</label>
+        <input id="xianyuRate" type="number" min="0" step="0.1" value="1.6">
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="row"><span>商品折算</span><strong id="goodsRmb">¥0.00</strong></div>
+      <div class="row"><span>10% 代购费</span><strong id="serviceFee">¥0.00</strong></div>
+      <div class="row"><span>客户承担交通费</span><strong id="customerTraffic">¥0.00</strong></div>
+      <div class="row total"><span>客户总共支付</span><strong id="customerTotal">¥0.00</strong></div>
+
+      <div class="row"><span>闲鱼服务费</span><strong id="xianyuFee">¥0.00</strong></div>
+      <div class="row"><span>闲鱼扣费后到账</span><strong id="netReceived">¥0.00</strong></div>
+
+      <div class="row"><span>商品实际成本</span><strong id="goodsCost">¥0.00</strong></div>
+      <div class="row"><span>交通费实际成本</span><strong id="transportCost">¥0.00</strong></div>
+      <div class="row"><span>汇率差利润</span><strong id="fxProfit">¥0.00</strong></div>
+      <div class="row"><span>代购费利润</span><strong id="serviceProfit">¥0.00</strong></div>
+      <div class="row"><span>交通费盈亏</span><strong id="trafficProfit">¥0.00</strong></div>
+
+      <div class="row profit"><span>预计总利润</span><strong id="finalProfit">¥0.00</strong></div>
+      <div class="row"><span>利润率（利润 ÷ 客户付款）</span><strong id="profitRate">0.00%</strong></div>
+    </div>
+
+    <div class="rules">
+      <b>当前规则</b><br>
+      商品价格 ＜ 10,000 日元：客户承担全部交通费<br>
+      10,000 ≤ 商品价格 ＜ 20,000 日元：客户承担一半交通费<br>
+      商品价格 ≥ 20,000 日元：客户免交通费<br>
+      代购费：按商品对客折算金额的 10% 收取<br>
+      闲鱼服务费：按客户总付款金额 × 服务费率计算
+    </div>
+    <div class="note">说明：总利润 = 闲鱼扣费后到账 − 商品实际成本 − 交通费实际成本。</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => "¥" + (Number.isFinite(n) ? n : 0).toFixed(2);
+
+  function calc(){
+    const price = Math.max(0, parseFloat($("price").value) || 0);
+    const transport = Math.max(0, parseFloat($("transport").value) || 0);
+    const sellRate = Math.max(0, parseFloat($("sellRate").value) || 0);
+    const costRate = Math.max(0, parseFloat($("costRate").value) || 0);
+    const xianyuRate = Math.max(0, parseFloat($("xianyuRate").value) || 0) / 100;
+
+    let customerTrafficJPY = 0;
+    if (price < 10000) {
+      customerTrafficJPY = transport;
+    } else if (price < 20000) {
+      customerTrafficJPY = transport / 2;
+    } else {
+      customerTrafficJPY = 0;
+    }
+
+    const goodsRmb = price * sellRate;
+    const serviceFee = goodsRmb * 0.10;
+    const customerTraffic = customerTrafficJPY * sellRate;
+    const customerTotal = goodsRmb + serviceFee + customerTraffic;
+
+    const xianyuFee = customerTotal * xianyuRate;
+    const netReceived = customerTotal - xianyuFee;
+
+    const goodsCost = price * costRate;
+    const transportCost = transport * costRate;
+
+    const fxProfit = price * (sellRate - costRate);
+    const serviceProfit = serviceFee;
+    const trafficProfit = customerTraffic - transportCost;
+
+    const finalProfit = netReceived - goodsCost - transportCost;
+    const profitRate = customerTotal > 0 ? finalProfit / customerTotal * 100 : 0;
+
+    $("goodsRmb").textContent = money(goodsRmb);
+    $("serviceFee").textContent = money(serviceFee);
+    $("customerTraffic").textContent = money(customerTraffic);
+    $("customerTotal").textContent = money(customerTotal);
+    $("xianyuFee").textContent = money(xianyuFee);
+    $("netReceived").textContent = money(netReceived);
+    $("goodsCost").textContent = money(goodsCost);
+    $("transportCost").textContent = money(transportCost);
+    $("fxProfit").textContent = money(fxProfit);
+    $("serviceProfit").textContent = money(serviceProfit);
+    $("trafficProfit").textContent = money(trafficProfit);
+    $("finalProfit").textContent = money(finalProfit);
+    $("profitRate").textContent = profitRate.toFixed(2) + "%";
+
+    $("finalProfit").className = finalProfit >= 0 ? "good" : "bad";
+  }
+
+  ["price","transport","sellRate","costRate","xianyuRate"].forEach(id => {
+    $(id).addEventListener("input", calc);
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>
