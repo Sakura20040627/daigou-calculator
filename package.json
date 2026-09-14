@@ -1,1 +1,1 @@
-{"name":"sakura-daigou-erp","version":"1.0.0","private":true,"scripts":{"dev":"vercel dev"},"dependencies":{"sm-crypto":"^0.3.13"},"devDependencies":{"vercel":"^48.1.0"}}
+{"name":"sakura-daigou-erp","version":"1.0.0","private":true,"scripts":{"dev":"vercel dev"},"dependencies":{"sm-crypto":"^0.5.7"},"devDependencies":{"vercel":"^48.1.0"}}
