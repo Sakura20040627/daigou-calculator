@@ -29,7 +29,7 @@ function calc(p, t, s, c, x, f) {
   return { customerTotal: total, profit: total - total * x / 100 - p * c - t * c };
 }
 function toDb(o) {
-  return { user_id:session.user.id, client_order_id:o.id, order_date:o.date, status:normalizeStatus(o.status), product:o.product, customer:o.customer || '', price_jpy:o.priceJPY || 0, transport_jpy:o.transportJPY || 0, sell_rate:o.sellRate || 0, cost_rate:o.costRate || 0, xianyu_rate:o.xianyuRate || 0, service_rate:o.serviceRate || 0, remark:o.remark || '', customer_total:o.customerTotal || 0, profit:o.profit || 0, updated_at:new Date().toISOString() };
+  return { user_id:session.user.id, client_order_id:o.id, order_date:o.date, status:o.status === '已完成' ? '已完成' : '待购买', product:o.product, customer:o.customer || '', price_jpy:o.priceJPY || 0, transport_jpy:o.transportJPY || 0, sell_rate:o.sellRate || 0, cost_rate:o.costRate || 0, xianyu_rate:o.xianyuRate || 0, service_rate:o.serviceRate || 0, remark:o.remark || '', customer_total:o.customerTotal || 0, profit:o.profit || 0, updated_at:new Date().toISOString() };
 }
 function fromDb(o) {
   return { id:o.client_order_id, date:o.order_date, status:normalizeStatus(o.status), product:o.product, customer:o.customer, priceJPY:+o.price_jpy, transportJPY:+o.transport_jpy, sellRate:+o.sell_rate, costRate:+o.cost_rate, xianyuRate:+o.xianyu_rate, serviceRate:+o.service_rate, remark:o.remark, customerTotal:+o.customer_total, profit:+o.profit };
