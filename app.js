@@ -42,7 +42,7 @@ function localLoad() {
 }
 function localSave() {
   const ok = writeLocal(LOCAL, JSON.stringify(orders));
-  if (!ok && !storageWarningShown) { storageWarningShown = true; toast('浏览器阻止了本地存储，当前订单仅暂存于本页面；请及时导出备份'); }
+  if (!ok && !storageWarningShown) { storageWarningShown = true; toast('浏览器阻止了本地存储，当前订单仅暂存于本页面；请允许此网站使用存储'); }
   return ok;
 }
 async function refresh() {
@@ -134,7 +134,7 @@ if ($('orderForm')) $('orderForm').onsubmit = async e => {
   if (!o.product) return toast('请填写商品名称');
   if (localMode || !session || !db) {
     const i = orders.findIndex(v => v.id === o.id); i < 0 ? orders.unshift(o) : orders[i] = o;
-    const persisted = localSave(); close(); render(); toast(persisted ? '已保存到本机' : '已创建订单，但浏览器未允许持久化，请导出备份'); return;
+    const persisted = localSave(); close(); render(); toast(persisted ? '已保存到本机' : '已创建订单，但浏览器未允许持久化，请允许网站存储'); return;
   }
   const saveButton = $('orderForm').querySelector('button[type="submit"]'); if (saveButton) saveButton.disabled = true;
   try { const { error } = await withTimeout(db.from('orders').upsert(toDb(o), { onConflict:'user_id,client_order_id' })); if (error) return toast('保存失败：' + error.message); close(); await refresh(); toast('已保存到云端'); }
