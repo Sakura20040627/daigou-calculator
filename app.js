@@ -1,7 +1,19 @@
 const SUPABASE_URL = 'https://qasjwpsgnchwxidpfaai.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_RmQkPdQmjSMQh13L2T6-9w_XnCcSxw-';
-const supabaseApi = window.supabase;
-const db = supabaseApi && typeof supabaseApi.createClient === 'function' ? supabaseApi.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let db = window.supabase && typeof window.supabase.createClient === 'function' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const SUPABASE_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js';
+function loadSupabase() {
+  if (db) return Promise.resolve(db);
+  if (window.__sakuraSupabaseLoader) return window.__sakuraSupabaseLoader;
+  window.__sakuraSupabaseLoader = new Promise(resolve => {
+    const script = document.createElement('script');
+    script.src = SUPABASE_CDN; script.async = true;
+    script.onload = () => { db = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY) || null; resolve(db); };
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+  });
+  return window.__sakuraSupabaseLoader;
+}
 const LEGACY = 'sakura_orders_v4', LOCAL = 'sakura_orders_local_v1';
 let orders = [], editing = null, filter = '全部', session = null, localMode = false, storageWarningShown = false;
 const $ = id => document.getElementById(id);
@@ -135,10 +147,19 @@ if ($('remove')) $('remove').onclick = async () => {
   try { const { error } = await withTimeout(db.from('orders').delete().eq('client_order_id', editing)); if (error) return toast('删除失败：' + error.message); close(); await refresh(); toast('已删除'); }
   catch (error) { toast('删除失败：' + (error?.message || '网络异常')); }
 };
-if (db?.auth?.onAuthStateChange) db.auth.onAuthStateChange((_event, s) => { session = s; if ($('auth')) $('auth').classList.toggle('hidden', !!s || localMode); if (s) refresh().catch(error => toast('云端加载失败：' + (error?.message || '网络异常'))); });
-(async () => {
-  if (!db) return enterLocal();
+let authBound = false;
+function bindAuth() {
+  if (authBound || !db?.auth?.onAuthStateChange) return;
+  authBound = true;
+  db.auth.onAuthStateChange((_event, s) => { session = s; if ($('auth')) $('auth').classList.toggle('hidden', !!s || localMode); if (s && !localMode) refresh().catch(error => toast('云端加载失败：' + (error?.message || '网络异常'))); });
+}
+async function initCloud() {
+  if (!db) await loadSupabase();
+  if (!db) { authMessage('云端脚本加载失败，可点击“先本地使用”；'); return; }
+  if (localMode) return;
+  bindAuth();
   try { const { data, error } = await withTimeout(db.auth.getSession()); if (error) throw error; session = data.session; if ($('auth')) $('auth').classList.toggle('hidden', !!session); if (session) { await migrate(); await refresh(); } }
   catch (error) { authMessage('云端暂时无法连接，可点击“先本地使用”；' + (error?.message || '')); }
-})();
+}
+initCloud();
 renderFilters();
