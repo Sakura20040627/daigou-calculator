@@ -99,6 +99,7 @@ function enterLocal() { localMode = true; session = null; if ($('auth')) $('auth
 
 if ($('authForm')) $('authForm').onsubmit = async e => {
   e.preventDefault();
+  if (!db) { authMessage('正在连接云端…'); await loadSupabase(); }
   if (!db) return authMessage('云端服务暂时不可用，可先使用本地模式');
   const button = $('authForm').querySelector('button[type="submit"]'), email = $('authEmail')?.value.trim() || '', password = $('authPassword')?.value || '';
   if (!email || password.length < 6) return authMessage('请输入邮箱和至少 6 位密码');
@@ -110,6 +111,7 @@ if ($('authForm')) $('authForm').onsubmit = async e => {
 };
 if ($('signup')) $('signup').onclick = async () => {
   const email = $('authEmail')?.value.trim() || '', password = $('authPassword')?.value || '';
+  if (!db) { authMessage('正在连接云端…'); await loadSupabase(); }
   if (!db) return authMessage('云端服务暂时不可用，可先使用本地模式');
   if (!email || password.length < 6) return authMessage('请输入邮箱和至少 6 位密码');
   const button = $('signup'); if (button) { button.disabled = true; button.textContent = '注册中…'; }
