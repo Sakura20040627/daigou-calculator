@@ -15,10 +15,10 @@ function loadSupabase() {
   return window.__sakuraSupabaseLoader;
 }
 const LEGACY = 'sakura_orders_v4', LOCAL = 'sakura_orders_local_v1';
-let orders = [], editing = null, filter = '全部', session = null, localMode = false, storageWarningShown = false;
+let orders = [], editing = null, filter = '待完成', session = null, localMode = false, storageWarningShown = false;
 const $ = id => document.getElementById(id);
 const money = n => '¥' + (Number(n) || 0).toFixed(2);
-const statuses = ['全部', '待完成', '已完成'];
+const statuses = ['待完成', '已完成'];
 const normalizeStatus = status => status === '已完成' ? '已完成' : '待完成';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const withTimeout = (promise, ms = 12000) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('请求超时，请检查网络连接')), ms))]);
