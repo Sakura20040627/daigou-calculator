@@ -18,7 +18,8 @@ const LEGACY = 'sakura_orders_v4', LOCAL = 'sakura_orders_local_v1';
 let orders = [], editing = null, filter = '全部', session = null, localMode = false, storageWarningShown = false;
 const $ = id => document.getElementById(id);
 const money = n => '¥' + (Number(n) || 0).toFixed(2);
-const statuses = ['全部', '待购买', '已购买', '日本运输', '已发国内', '已完成', '已取消'];
+const statuses = ['全部', '待完成', '已完成'];
+const normalizeStatus = status => status === '已完成' ? '已完成' : '待完成';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const withTimeout = (promise, ms = 12000) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('请求超时，请检查网络连接')), ms))]);
 
@@ -28,16 +29,16 @@ function calc(p, t, s, c, x, f) {
   return { customerTotal: total, profit: total - total * x / 100 - p * c - t * c };
 }
 function toDb(o) {
-  return { user_id:session.user.id, client_order_id:o.id, order_date:o.date, status:o.status, product:o.product, customer:o.customer || '', price_jpy:o.priceJPY || 0, transport_jpy:o.transportJPY || 0, sell_rate:o.sellRate || 0, cost_rate:o.costRate || 0, xianyu_rate:o.xianyuRate || 0, service_rate:o.serviceRate || 0, remark:o.remark || '', customer_total:o.customerTotal || 0, profit:o.profit || 0, updated_at:new Date().toISOString() };
+  return { user_id:session.user.id, client_order_id:o.id, order_date:o.date, status:normalizeStatus(o.status), product:o.product, customer:o.customer || '', price_jpy:o.priceJPY || 0, transport_jpy:o.transportJPY || 0, sell_rate:o.sellRate || 0, cost_rate:o.costRate || 0, xianyu_rate:o.xianyuRate || 0, service_rate:o.serviceRate || 0, remark:o.remark || '', customer_total:o.customerTotal || 0, profit:o.profit || 0, updated_at:new Date().toISOString() };
 }
 function fromDb(o) {
-  return { id:o.client_order_id, date:o.order_date, status:o.status, product:o.product, customer:o.customer, priceJPY:+o.price_jpy, transportJPY:+o.transport_jpy, sellRate:+o.sell_rate, costRate:+o.cost_rate, xianyuRate:+o.xianyu_rate, serviceRate:+o.service_rate, remark:o.remark, customerTotal:+o.customer_total, profit:+o.profit };
+  return { id:o.client_order_id, date:o.order_date, status:normalizeStatus(o.status), product:o.product, customer:o.customer, priceJPY:+o.price_jpy, transportJPY:+o.transport_jpy, sellRate:+o.sell_rate, costRate:+o.cost_rate, xianyuRate:+o.xianyu_rate, serviceRate:+o.service_rate, remark:o.remark, customerTotal:+o.customer_total, profit:+o.profit };
 }
 function readLocal(key) { try { return localStorage.getItem(key); } catch { return null; } }
 function writeLocal(key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } }
 function removeLocal(key) { try { localStorage.removeItem(key); } catch {} }
 function localLoad() {
-  try { const parsed = JSON.parse(readLocal(LOCAL) || '[]'); orders = Array.isArray(parsed) ? parsed : []; } catch { orders = []; }
+  try { const parsed = JSON.parse(readLocal(LOCAL) || '[]'); orders = Array.isArray(parsed) ? parsed.map(o => ({ ...o, status:normalizeStatus(o.status) })) : []; } catch { orders = []; }
   render();
 }
 function localSave() {
@@ -77,14 +78,27 @@ function render() {
   if ($('doneRate')) $('doneRate').textContent = `完成率 ${orders.length ? (done / orders.length * 100).toFixed(0) : 0}%`;
   if ($('revenue')) $('revenue').textContent = money(valid.reduce((n,o) => n + (+o.customerTotal || 0), 0));
   if ($('profit')) $('profit').textContent = money(valid.reduce((n,o) => n + (+o.profit || 0), 0));
+  renderCustomerChart(valid);
   body.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => open(orders.find(o => o.id === b.dataset.edit)));
+}
+function renderCustomerChart(source = orders) {
+  const chart = $('customerChart');
+  if (!chart) return;
+  const groups = new Map();
+  source.forEach(o => { const name = (o.customer || '').trim() || '未填写客户'; groups.set(name, (groups.get(name) || 0) + (+o.customerTotal || 0)); });
+  const entries = [...groups.entries()].sort((a,b) => b[1] - a[1]);
+  const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
+  if ($('customerChartTotal')) $('customerChartTotal').textContent = money(total);
+  if (!entries.length) { chart.innerHTML = '<div class="chart-empty">创建订单后，这里会按客户姓名显示消费金额</div>'; return; }
+  const max = entries[0][1] || 1;
+  chart.innerHTML = entries.map(([name, amount]) => `<div class="customer-row"><div class="customer-meta"><span title="${esc(name)}">${esc(name)}</span><b>${money(amount)}</b></div><div class="customer-track"><i style="width:${Math.max(4, amount / max * 100)}%"></i></div></div>`).join('');
 }
 function open(o) {
   if (!$('backdrop')) return;
   editing = o?.id || null;
   if ($('modalTitle')) $('modalTitle').textContent = o ? '编辑订单' : '新建订单';
   if ($('remove')) $('remove').style.visibility = o ? 'visible' : 'hidden';
-  const defaults = { date:new Date().toISOString().slice(0,10), status:'待购买', priceJPY:1e4, transportJPY:1e3, sellRate:.045, costRate:.0438, xianyuRate:.6, serviceRate:10 };
+  const defaults = { date:new Date().toISOString().slice(0,10), status:'待完成', priceJPY:1e4, transportJPY:1e3, sellRate:.045, costRate:.0438, xianyuRate:.6, serviceRate:10 };
   Object.keys(defaults).concat(['product','customer','remark']).forEach(id => { if ($(id)) $(id).value = o?.[id] ?? defaults[id] ?? ''; });
   $('backdrop').classList.add('open');
 }
