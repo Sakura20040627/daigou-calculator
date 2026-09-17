@@ -37,9 +37,9 @@
 <script>
 (() => {
   const KEY='sakura_erp_local_orders_v1';
-  let orders=[], editing=null, filter='全部';
+  let orders=[], editing=null, filter='待完成';
   const $=id=>document.getElementById(id), money=n=>'¥'+(Number(n)||0).toFixed(2);
-  const statuses=['全部','待完成','已完成'];
+  const statuses=['待完成','已完成'];
   const normalizeStatus=status=>status==='已完成'?'已完成':'待完成';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const calc=(p,t,s,c,x,f)=>{const traffic=(p<1e4?t:p<2e4?t/2:0)*s,total=p*s+p*s*f/100+traffic;return{customerTotal:total,profit:total-total*x/100-p*c-t*c};};
