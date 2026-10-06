@@ -14,8 +14,9 @@ function loadSupabase() {
   });
   return window.__sakuraSupabaseLoader;
 }
-const LEGACY = 'sakura_orders_v4', LOCAL = 'sakura_orders_local_v1';
-let orders = [], editing = null, filter = '待完成', session = null, localMode = false, storageWarningShown = false;
+const LEGACY = 'sakura_orders_v4', LOCAL = 'sakura_orders_local_v1', LOCAL_MODE = 'sakura_local_mode_v1';
+const rememberedLocalMode = (() => { try { return sessionStorage.getItem(LOCAL_MODE) === '1'; } catch { return false; } })();
+let orders = [], editing = null, filter = '待完成', session = null, localMode = rememberedLocalMode, storageWarningShown = false;
 let liveCostRate = .0438;
 const FX_URL = 'https://api.frankfurter.dev/v2/rate/jpy/cny', FX_CACHE = 'sakura_fx_jpy_cny_v1';
 const $ = id => document.getElementById(id);
@@ -137,7 +138,7 @@ function render() {
   const body = $('body'); if (!body) return;
   const q = ($('search')?.value || '').toLowerCase();
   const rows = orders.filter(o => (filter === '全部' || o.status === filter) && [o.id,o.product,o.customer].join(' ').toLowerCase().includes(q));
-  body.innerHTML = rows.map(o => `<tr><td><b>${esc(o.id)}</b><small>${esc(o.date)}</small></td><td><b>${esc(o.product)}</b><small>${esc(o.customer || '未填写客户')} · <span class="mode-tag">${o.pricingMode === 'allin' ? '0.055 包邮' : '旧阶梯'}</span></small></td><td>¥${(+o.priceJPY || 0).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="profitCell">${money(o.profit)}</td><td>${badge(o.status)}</td><td><button class="dots" data-edit="${esc(o.id)}">•••</button></td></tr>`).join('');
+  body.innerHTML = rows.map(o => `<tr><td><b>${esc(o.id)}</b><small>${esc(o.date)}</small></td><td><b>${esc(o.product)}</b><small>${esc(o.customer || '未填写客户')} · <span class="mode-tag">${o.pricingMode === 'allin' ? '0.055 包邮' : '旧阶梯'}</span></small></td><td>¥${(+o.priceJPY || 0).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="profitCell">${money(o.profit)}</td><td>${badge(o.status)}</td><td><button class="dots" data-edit="${esc(o.id)}" aria-label="编辑订单">编辑</button></td></tr>`).join('');
   if ($('empty')) $('empty').style.display = rows.length ? 'none' : 'block';
   const valid = orders.filter(o => o.status !== '已取消'), done = orders.filter(o => o.status === '已完成').length;
   if ($('nOrders')) $('nOrders').textContent = orders.length;
@@ -201,7 +202,7 @@ function toast(message) {
   toast.timer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 function authMessage(message) { if ($('authError')) $('authError').textContent = message || ''; }
-function enterLocal() { localMode = true; session = null; if ($('auth')) $('auth').classList.add('hidden'); localLoad(); toast('已进入本地模式，数据保存在此设备'); }
+function enterLocal() { localMode = true; session = null; try { sessionStorage.setItem(LOCAL_MODE, '1'); } catch {} if ($('auth')) $('auth').classList.add('hidden'); localLoad(); toast('已进入本地模式，数据保存在此设备'); }
 
 if ($('authForm')) $('authForm').onsubmit = async e => {
   e.preventDefault();
@@ -266,15 +267,15 @@ let authBound = false;
 function bindAuth() {
   if (authBound || !db?.auth?.onAuthStateChange) return;
   authBound = true;
-  db.auth.onAuthStateChange((_event, s) => { session = s; if ($('auth')) $('auth').classList.toggle('hidden', !!s || localMode); if (s && !localMode) refresh().catch(error => toast('云端加载失败：' + (error?.message || '网络异常'))); });
+  db.auth.onAuthStateChange((event, s) => { if (localMode || (event === 'INITIAL_SESSION' && !s)) return; session = s; if ($('auth')) $('auth').classList.toggle('hidden', !!s); if (s) refresh().catch(error => toast('云端加载失败：' + (error?.message || '网络异常'))); });
 }
 async function initCloud() {
+  if (localMode) { if ($('auth')) $('auth').classList.add('hidden'); localLoad(); return; }
   if (!db) await loadSupabase();
-  if (!db) { authMessage('云端脚本加载失败，可点击“先本地使用”；'); return; }
-  if (localMode) return;
+  if (!db) { if ($('auth')) $('auth').classList.remove('hidden'); authMessage('云端脚本加载失败，可点击“先本地使用”；'); return; }
   bindAuth();
   try { const { data, error } = await withTimeout(db.auth.getSession()); if (error) throw error; session = data.session; if ($('auth')) $('auth').classList.toggle('hidden', !!session); if (session) { await migrate(); await refresh(); } }
-  catch (error) { authMessage('云端暂时无法连接，可点击“先本地使用”；' + (error?.message || '')); }
+  catch (error) { if ($('auth')) $('auth').classList.remove('hidden'); authMessage('云端暂时无法连接，可点击“先本地使用”；' + (error?.message || '')); }
 }
 initCloud();
 renderFilters();
