@@ -2,6 +2,26 @@ const $ = id => document.getElementById(id);
 const money = n => '¥' + (Number(n) || 0).toFixed(2);
 const labels = { quote:'0.055 包邮报价', goods:'商品折算', service:'代购费', traffic:'客户承担交通费', total:'客户总支付', xy:'闲鱼服务费', net:'扣费后到账', cost:'商品实际成本', tcost:'日本交通实际成本', international:'国际物流成本' };
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const FX_URL = 'https://api.frankfurter.dev/v2/rate/jpy/cny', FX_CACHE = 'sakura_fx_jpy_cny_v1';
+
+function readRateCache() { try { return JSON.parse(localStorage.getItem(FX_CACHE) || 'null'); } catch { return null; } }
+function applyCostRate(rate, date, source = '网络参考') {
+  const value = Number(rate); if (!Number.isFinite(value) || value <= 0) return false;
+  if ($('costRate').dataset.userEdited !== 'true') $('costRate').value = value.toFixed(5);
+  $('rateStatus').textContent = `${date || '最新'} · ${source}`; calc(); return true;
+}
+async function refreshLiveRate() {
+  const button = $('refreshRate'); button.classList.add('loading'); $('rateStatus').textContent = '正在获取网络汇率';
+  const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(FX_URL, { cache:'no-store', signal:controller.signal });
+    if (!response.ok) throw new Error('rate unavailable');
+    const data = await response.json(); if (!applyCostRate(data.rate, data.date)) throw new Error('invalid rate');
+    try { localStorage.setItem(FX_CACHE, JSON.stringify({ rate:data.rate, date:data.date, savedAt:Date.now() })); } catch {}
+  } catch {
+    const cached = readRateCache(); if (!cached || !applyCostRate(cached.rate, cached.date, '缓存参考')) $('rateStatus').textContent = '网络不可用 · 可手动输入';
+  } finally { clearTimeout(timer); button.classList.remove('loading'); }
+}
 
 function setupGlassSelect(select) {
   select.classList.add('native-select');
@@ -56,7 +76,10 @@ function calc() {
 }
 
 document.querySelectorAll('input').forEach(el => el.oninput = calc);
+$('costRate').addEventListener('input', () => { $('costRate').dataset.userEdited = 'true'; });
+$('refreshRate').onclick = () => { $('costRate').dataset.userEdited = ''; refreshLiveRate(); };
 $('pricingMode').onchange = setMode;
 setupGlassSelect($('pricingMode'));
 setMode();
+refreshLiveRate();
 
