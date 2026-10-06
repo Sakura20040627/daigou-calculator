@@ -24,6 +24,40 @@ const normalizeStatus = status => status === '已完成' ? '已完成' : '待完
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const withTimeout = (promise, ms = 12000) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('请求超时，请检查网络连接')), ms))]);
 
+function setupGlassSelect(select) {
+  if (!select || select.dataset.glassSelect) { select?._glassRefresh?.(); return; }
+  select.dataset.glassSelect = 'true';
+  select.classList.add('native-select');
+  const shell = document.createElement('div');
+  shell.className = 'glass-select';
+  shell.innerHTML = '<button type="button" class="glass-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span></span><i></i></button><div class="glass-select-menu" role="listbox"></div>';
+  select.insertAdjacentElement('afterend', shell);
+  const trigger = shell.querySelector('.glass-select-trigger'), label = trigger.querySelector('span'), menu = shell.querySelector('.glass-select-menu');
+  const close = () => { shell.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); };
+  const refresh = () => {
+    const selected = select.options[select.selectedIndex];
+    label.textContent = selected?.textContent || '请选择';
+    menu.innerHTML = '';
+    [...select.options].forEach(option => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'glass-select-option'; button.setAttribute('role', 'option');
+      button.classList.toggle('selected', option.selected); button.setAttribute('aria-selected', String(option.selected));
+      button.innerHTML = `<span>${esc(option.textContent)}</span><i aria-hidden="true">✓</i>`;
+      button.onclick = event => { event.stopPropagation(); select.value = option.value; select.dispatchEvent(new Event('change', { bubbles:true })); close(); refresh(); };
+      menu.appendChild(button);
+    });
+  };
+  trigger.onclick = event => {
+    event.stopPropagation();
+    document.querySelectorAll('.glass-select.open').forEach(other => { if (other !== shell) other.classList.remove('open'); });
+    const opening = !shell.classList.contains('open'); shell.classList.toggle('open', opening); trigger.setAttribute('aria-expanded', String(opening));
+  };
+  select.addEventListener('change', refresh); select._glassRefresh = refresh; select._glassClose = close; refresh();
+}
+function refreshGlassSelect(id) { $(id)?._glassRefresh?.(); }
+document.addEventListener('click', () => document.querySelectorAll('.glass-select.open').forEach(el => el.classList.remove('open')));
+document.addEventListener('keydown', event => { if (event.key === 'Escape') { document.querySelectorAll('.glass-select.open').forEach(el => el.classList.remove('open')); if ($('backdrop')?.classList.contains('open')) close(); } });
+
 function calc(p, t, s, c, x, f, pricingMode = 'legacy', shippingKg = 0) {
   if (pricingMode === 'allin') {
     const customerTotal = p * ALL_IN_RATE;
@@ -106,16 +140,19 @@ function updateCustomerChoices() {
   const names = [...new Set(orders.map(o => (o.customer || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'zh-CN'));
   if ($('customerOptions')) $('customerOptions').innerHTML = names.map(name => `<option value="${esc(name)}"></option>`).join('');
   if ($('customerQuick')) $('customerQuick').innerHTML = '<option value="">请选择过去输入过的客户</option>' + names.map(name => `<option value="${esc(name)}">${esc(name)}${name === LEGACY_CUSTOMER ? '（旧阶梯）' : ''}</option>`).join('');
+  refreshGlassSelect('customerQuick');
 }
 function setPricingMode(mode) {
   const selected = mode === 'legacy' ? 'legacy' : 'allin';
   if ($('pricingMode')) $('pricingMode').value = selected;
-  document.querySelectorAll('.all-in-field').forEach(el => el.hidden = selected !== 'allin');
-  document.querySelectorAll('.legacy-field').forEach(el => el.hidden = selected === 'allin');
+  document.querySelectorAll('.all-in-field').forEach(el => { const active = selected === 'allin'; el.classList.toggle('is-active', active); el.toggleAttribute('inert', !active); el.setAttribute('aria-hidden', String(!active)); });
+  document.querySelectorAll('.legacy-field').forEach(el => { const active = selected === 'legacy'; el.classList.toggle('is-active', active); el.toggleAttribute('inert', !active); el.setAttribute('aria-hidden', String(!active)); });
   if ($('modeHint')) $('modeHint').textContent = selected === 'allin' ? '默认模式：按 0.055 报价并包含国际物流。' : '旧模式：仅客户“醒醒”自动使用。';
   if ($('pricingNote')) $('pricingNote').innerHTML = selected === 'allin'
     ? '<b>0.055 包邮</b>　客户支付 = 商品日元价 × 0.055；利润按 60 元/kg 扣除实际国际物流成本。'
     : '<b>旧阶梯模式</b>　保留原对客汇率、代购费与日本交通费阶梯规则。';
+  if ($('pricingNote')?.animate) $('pricingNote').animate([{ opacity:.45, transform:'translateY(5px)' }, { opacity:1, transform:'translateY(0)' }], { duration:220, easing:'cubic-bezier(.2,.8,.2,1)' });
+  refreshGlassSelect('pricingMode');
 }
 function applyCustomerPricing(customer) { setPricingMode((customer || '').trim() === LEGACY_CUSTOMER ? 'legacy' : 'allin'); }
 function open(o) {
@@ -128,6 +165,7 @@ function open(o) {
   if ($('legacySellRate')) $('legacySellRate').value = o?.pricingMode === 'legacy' ? (o.sellRate || .045) : .045;
   if ($('customerQuick')) $('customerQuick').value = o?.customer && [...$('customerQuick').options].some(option => option.value === o.customer) ? o.customer : '';
   setPricingMode(o?.pricingMode || (o ? 'legacy' : 'allin'));
+  refreshGlassSelect('status'); refreshGlassSelect('customerQuick');
   $('backdrop').classList.add('open');
 }
 function close() { if ($('backdrop')) $('backdrop').classList.remove('open'); editing = null; }
@@ -174,6 +212,7 @@ if ($('search')) $('search').oninput = render;
 if ($('pricingMode')) $('pricingMode').onchange = e => setPricingMode(e.target.value);
 if ($('customer')) $('customer').oninput = e => applyCustomerPricing(e.target.value);
 if ($('customerQuick')) $('customerQuick').onchange = e => { if (!e.target.value) return; $('customer').value = e.target.value; applyCustomerPricing(e.target.value); };
+if ($('backdrop')) $('backdrop').onclick = e => { if (e.target === $('backdrop')) close(); };
 if ($('orderForm')) $('orderForm').onsubmit = async e => {
   e.preventDefault();
   const pricingMode = $('pricingMode').value === 'legacy' ? 'legacy' : 'allin';
@@ -211,4 +250,5 @@ async function initCloud() {
 }
 initCloud();
 renderFilters();
+['status','customerQuick','pricingMode'].forEach(id => setupGlassSelect($(id)));
 
