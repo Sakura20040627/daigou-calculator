@@ -19,20 +19,28 @@ let orders = [], editing = null, filter = '待完成', session = null, localMode
 const $ = id => document.getElementById(id);
 const money = n => '¥' + (Number(n) || 0).toFixed(2);
 const statuses = ['待完成', '已完成'];
+const ALL_IN_RATE = .055, INTERNATIONAL_SHIPPING_PER_KG = 60, LEGACY_CUSTOMER = '醒醒';
 const normalizeStatus = status => status === '已完成' ? '已完成' : '待完成';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const withTimeout = (promise, ms = 12000) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('请求超时，请检查网络连接')), ms))]);
 
-function calc(p, t, s, c, x, f) {
+function calc(p, t, s, c, x, f, pricingMode = 'legacy', shippingKg = 0) {
+  if (pricingMode === 'allin') {
+    const customerTotal = p * ALL_IN_RATE;
+    return { customerTotal, profit:customerTotal - customerTotal * x / 100 - p * c - t * c - shippingKg * INTERNATIONAL_SHIPPING_PER_KG };
+  }
   const traffic = (p < 1e4 ? t : p < 2e4 ? t / 2 : 0) * s;
   const total = p * s + p * s * f / 100 + traffic;
   return { customerTotal: total, profit: total - total * x / 100 - p * c - t * c };
 }
 function toDb(o) {
-  return { user_id:session.user.id, client_order_id:o.id, order_date:o.date, status:o.status === '已完成' ? '已完成' : '待购买', product:o.product, customer:o.customer || '', price_jpy:o.priceJPY || 0, transport_jpy:o.transportJPY || 0, sell_rate:o.sellRate || 0, cost_rate:o.costRate || 0, xianyu_rate:o.xianyuRate || 0, service_rate:o.serviceRate || 0, remark:o.remark || '', customer_total:o.customerTotal || 0, profit:o.profit || 0, updated_at:new Date().toISOString() };
+  const encodedServiceRate = o.pricingMode === 'allin' ? -(Math.abs(+o.shippingKg || 0)) : (+o.serviceRate || 0);
+  return { user_id:session.user.id, client_order_id:o.id, order_date:o.date, status:o.status === '已完成' ? '已完成' : '待购买', product:o.product, customer:o.customer || '', price_jpy:o.priceJPY || 0, transport_jpy:o.transportJPY || 0, sell_rate:o.pricingMode === 'allin' ? ALL_IN_RATE : (o.sellRate || 0), cost_rate:o.costRate || 0, xianyu_rate:o.xianyuRate || 0, service_rate:encodedServiceRate, remark:o.remark || '', customer_total:o.customerTotal || 0, profit:o.profit || 0, updated_at:new Date().toISOString() };
 }
 function fromDb(o) {
-  return { id:o.client_order_id, date:o.order_date, status:normalizeStatus(o.status), product:o.product, customer:o.customer, priceJPY:+o.price_jpy, transportJPY:+o.transport_jpy, sellRate:+o.sell_rate, costRate:+o.cost_rate, xianyuRate:+o.xianyu_rate, serviceRate:+o.service_rate, remark:o.remark, customerTotal:+o.customer_total, profit:+o.profit };
+  const encodedServiceRate = +o.service_rate || 0;
+  const pricingMode = Math.abs((+o.sell_rate || 0) - ALL_IN_RATE) < .000001 && encodedServiceRate <= 0 ? 'allin' : 'legacy';
+  return { id:o.client_order_id, date:o.order_date, status:normalizeStatus(o.status), product:o.product, customer:o.customer, priceJPY:+o.price_jpy, transportJPY:+o.transport_jpy, pricingMode, shippingKg:pricingMode === 'allin' ? Math.abs(encodedServiceRate) : 0, sellRate:+o.sell_rate, costRate:+o.cost_rate, xianyuRate:+o.xianyu_rate, serviceRate:pricingMode === 'legacy' ? encodedServiceRate : 0, remark:o.remark, customerTotal:+o.customer_total, profit:+o.profit };
 }
 function readLocal(key) { try { return localStorage.getItem(key); } catch { return null; } }
 function writeLocal(key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } }
@@ -70,7 +78,7 @@ function render() {
   const body = $('body'); if (!body) return;
   const q = ($('search')?.value || '').toLowerCase();
   const rows = orders.filter(o => (filter === '全部' || o.status === filter) && [o.id,o.product,o.customer].join(' ').toLowerCase().includes(q));
-  body.innerHTML = rows.map(o => `<tr><td><b>${esc(o.id)}</b><small>${esc(o.date)}</small></td><td><b>${esc(o.product)}</b><small>${esc(o.customer || '未填写客户')}</small></td><td>¥${(+o.priceJPY || 0).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="profitCell">${money(o.profit)}</td><td>${badge(o.status)}</td><td><button class="dots" data-edit="${esc(o.id)}">•••</button></td></tr>`).join('');
+  body.innerHTML = rows.map(o => `<tr><td><b>${esc(o.id)}</b><small>${esc(o.date)}</small></td><td><b>${esc(o.product)}</b><small>${esc(o.customer || '未填写客户')} · <span class="mode-tag">${o.pricingMode === 'allin' ? '0.055 包邮' : '旧阶梯'}</span></small></td><td>¥${(+o.priceJPY || 0).toLocaleString()}</td><td>${money(o.customerTotal)}</td><td class="profitCell">${money(o.profit)}</td><td>${badge(o.status)}</td><td><button class="dots" data-edit="${esc(o.id)}">•••</button></td></tr>`).join('');
   if ($('empty')) $('empty').style.display = rows.length ? 'none' : 'block';
   const valid = orders.filter(o => o.status !== '已取消'), done = orders.filter(o => o.status === '已完成').length;
   if ($('nOrders')) $('nOrders').textContent = orders.length;
@@ -79,6 +87,7 @@ function render() {
   if ($('revenue')) $('revenue').textContent = money(valid.reduce((n,o) => n + (+o.customerTotal || 0), 0));
   if ($('profit')) $('profit').textContent = money(valid.reduce((n,o) => n + (+o.profit || 0), 0));
   renderCustomerChart(valid);
+  updateCustomerChoices();
   body.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => open(orders.find(o => o.id === b.dataset.edit)));
 }
 function renderCustomerChart(source = orders) {
@@ -93,13 +102,32 @@ function renderCustomerChart(source = orders) {
   const max = entries[0][1] || 1;
   chart.innerHTML = entries.map(([name, amount]) => `<div class="customer-row"><div class="customer-meta"><span title="${esc(name)}">${esc(name)}</span><b>${money(amount)}</b></div><div class="customer-track"><i style="width:${Math.max(4, amount / max * 100)}%"></i></div></div>`).join('');
 }
+function updateCustomerChoices() {
+  const names = [...new Set(orders.map(o => (o.customer || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'zh-CN'));
+  if ($('customerOptions')) $('customerOptions').innerHTML = names.map(name => `<option value="${esc(name)}"></option>`).join('');
+  if ($('customerQuick')) $('customerQuick').innerHTML = '<option value="">请选择过去输入过的客户</option>' + names.map(name => `<option value="${esc(name)}">${esc(name)}${name === LEGACY_CUSTOMER ? '（旧阶梯）' : ''}</option>`).join('');
+}
+function setPricingMode(mode) {
+  const selected = mode === 'legacy' ? 'legacy' : 'allin';
+  if ($('pricingMode')) $('pricingMode').value = selected;
+  document.querySelectorAll('.all-in-field').forEach(el => el.hidden = selected !== 'allin');
+  document.querySelectorAll('.legacy-field').forEach(el => el.hidden = selected === 'allin');
+  if ($('modeHint')) $('modeHint').textContent = selected === 'allin' ? '默认模式：按 0.055 报价并包含国际物流。' : '旧模式：仅客户“醒醒”自动使用。';
+  if ($('pricingNote')) $('pricingNote').innerHTML = selected === 'allin'
+    ? '<b>0.055 包邮</b>　客户支付 = 商品日元价 × 0.055；利润按 60 元/kg 扣除实际国际物流成本。'
+    : '<b>旧阶梯模式</b>　保留原对客汇率、代购费与日本交通费阶梯规则。';
+}
+function applyCustomerPricing(customer) { setPricingMode((customer || '').trim() === LEGACY_CUSTOMER ? 'legacy' : 'allin'); }
 function open(o) {
   if (!$('backdrop')) return;
   editing = o?.id || null;
   if ($('modalTitle')) $('modalTitle').textContent = o ? '编辑订单' : '新建订单';
   if ($('remove')) $('remove').style.visibility = o ? 'visible' : 'hidden';
-  const defaults = { date:new Date().toISOString().slice(0,10), status:'待完成', priceJPY:1e4, transportJPY:1e3, sellRate:.045, costRate:.0438, xianyuRate:.6, serviceRate:10 };
+  const defaults = { date:new Date().toISOString().slice(0,10), status:'待完成', priceJPY:1e4, transportJPY:1e3, sellRate:ALL_IN_RATE, costRate:.0438, xianyuRate:.6, serviceRate:10, shippingKg:1 };
   Object.keys(defaults).concat(['product','customer','remark']).forEach(id => { if ($(id)) $(id).value = o?.[id] ?? defaults[id] ?? ''; });
+  if ($('legacySellRate')) $('legacySellRate').value = o?.pricingMode === 'legacy' ? (o.sellRate || .045) : .045;
+  if ($('customerQuick')) $('customerQuick').value = o?.customer && [...$('customerQuick').options].some(option => option.value === o.customer) ? o.customer : '';
+  setPricingMode(o?.pricingMode || (o ? 'legacy' : 'allin'));
   $('backdrop').classList.add('open');
 }
 function close() { if ($('backdrop')) $('backdrop').classList.remove('open'); editing = null; }
@@ -143,10 +171,14 @@ if ($('new')) $('new').onclick = () => open();
 if ($('close')) $('close').onclick = close;
 if ($('cancel')) $('cancel').onclick = close;
 if ($('search')) $('search').oninput = render;
+if ($('pricingMode')) $('pricingMode').onchange = e => setPricingMode(e.target.value);
+if ($('customer')) $('customer').oninput = e => applyCustomerPricing(e.target.value);
+if ($('customerQuick')) $('customerQuick').onchange = e => { if (!e.target.value) return; $('customer').value = e.target.value; applyCustomerPricing(e.target.value); };
 if ($('orderForm')) $('orderForm').onsubmit = async e => {
   e.preventDefault();
-  const p = +$('priceJPY').value || 0, t = +$('transportJPY').value || 0, s = +$('sellRate').value || 0, c = +$('costRate').value || 0, x = +$('xianyuRate').value || 0, f = +$('serviceRate').value || 0;
-  const o = { id:editing || 'DG-' + Date.now().toString().slice(-8), date:$('date').value, status:$('status').value, product:$('product').value.trim(), customer:$('customer').value.trim(), priceJPY:p, transportJPY:t, sellRate:s, costRate:c, xianyuRate:x, serviceRate:f, remark:$('remark').value.trim(), ...calc(p,t,s,c,x,f) };
+  const pricingMode = $('pricingMode').value === 'legacy' ? 'legacy' : 'allin';
+  const p = +$('priceJPY').value || 0, t = +$('transportJPY').value || 0, s = pricingMode === 'allin' ? ALL_IN_RATE : (+$('legacySellRate').value || 0), c = +$('costRate').value || 0, x = +$('xianyuRate').value || 0, f = pricingMode === 'legacy' ? (+$('serviceRate').value || 0) : 0, shippingKg = pricingMode === 'allin' ? (+$('shippingKg').value || 0) : 0;
+  const o = { id:editing || 'DG-' + Date.now().toString().slice(-8), date:$('date').value, status:$('status').value, product:$('product').value.trim(), customer:$('customer').value.trim(), pricingMode, shippingKg, priceJPY:p, transportJPY:t, sellRate:s, costRate:c, xianyuRate:x, serviceRate:f, remark:$('remark').value.trim(), ...calc(p,t,s,c,x,f,pricingMode,shippingKg) };
   if (!o.product) return toast('请填写商品名称');
   if (localMode || !session || !db) {
     const i = orders.findIndex(v => v.id === o.id); i < 0 ? orders.unshift(o) : orders[i] = o;
@@ -179,3 +211,4 @@ async function initCloud() {
 }
 initCloud();
 renderFilters();
+
