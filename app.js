@@ -16,6 +16,8 @@ function loadSupabase() {
 }
 const LEGACY = 'sakura_orders_v4', LOCAL = 'sakura_orders_local_v1';
 let orders = [], editing = null, filter = '待完成', session = null, localMode = false, storageWarningShown = false;
+let liveCostRate = .0438;
+const FX_URL = 'https://api.frankfurter.dev/v2/rate/jpy/cny', FX_CACHE = 'sakura_fx_jpy_cny_v1';
 const $ = id => document.getElementById(id);
 const money = n => '¥' + (Number(n) || 0).toFixed(2);
 const statuses = ['待完成', '已完成'];
@@ -87,6 +89,29 @@ function localSave() {
   const ok = writeLocal(LOCAL, JSON.stringify(orders));
   if (!ok && !storageWarningShown) { storageWarningShown = true; toast('浏览器阻止了本地存储，当前订单仅暂存于本页面；请允许此网站使用存储'); }
   return ok;
+}
+function applyCostRate(rate, date, source = '网络参考') {
+  const value = Number(rate);
+  if (!Number.isFinite(value) || value <= 0) return false;
+  liveCostRate = value;
+  if ($('costRate') && $('costRate').dataset.userEdited !== 'true' && !editing) $('costRate').value = value.toFixed(5);
+  if ($('rateStatus')) $('rateStatus').textContent = `${date || '最新'} · ${source}`;
+  return true;
+}
+async function refreshLiveRate() {
+  const button = $('refreshRate'), status = $('rateStatus');
+  if (button) button.classList.add('loading'); if (status) status.textContent = '正在获取网络汇率';
+  const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(FX_URL, { cache:'no-store', signal:controller.signal });
+    if (!response.ok) throw new Error('rate unavailable');
+    const data = await response.json();
+    if (!applyCostRate(data.rate, data.date)) throw new Error('invalid rate');
+    writeLocal(FX_CACHE, JSON.stringify({ rate:data.rate, date:data.date, savedAt:Date.now() }));
+  } catch {
+    try { const cached = JSON.parse(readLocal(FX_CACHE) || 'null'); if (!cached || !applyCostRate(cached.rate, cached.date, '缓存参考')) throw new Error(); }
+    catch { if (status) status.textContent = '网络不可用 · 可手动输入'; }
+  } finally { clearTimeout(timer); if (button) button.classList.remove('loading'); }
 }
 async function refresh() {
   if (!db || !session) return localLoad();
@@ -160,8 +185,9 @@ function open(o) {
   editing = o?.id || null;
   if ($('modalTitle')) $('modalTitle').textContent = o ? '编辑订单' : '新建订单';
   if ($('remove')) $('remove').style.visibility = o ? 'visible' : 'hidden';
-  const defaults = { date:new Date().toISOString().slice(0,10), status:'待完成', priceJPY:1e4, transportJPY:1e3, sellRate:ALL_IN_RATE, costRate:.0438, xianyuRate:.6, serviceRate:10, shippingKg:1 };
+  const defaults = { date:new Date().toISOString().slice(0,10), status:'待完成', priceJPY:1e4, transportJPY:1e3, sellRate:ALL_IN_RATE, costRate:liveCostRate, xianyuRate:.6, serviceRate:10, shippingKg:1 };
   Object.keys(defaults).concat(['product','customer','remark']).forEach(id => { if ($(id)) $(id).value = o?.[id] ?? defaults[id] ?? ''; });
+  if ($('costRate')) $('costRate').dataset.userEdited = o ? 'true' : '';
   if ($('legacySellRate')) $('legacySellRate').value = o?.pricingMode === 'legacy' ? (o.sellRate || .045) : .045;
   if ($('customerQuick')) $('customerQuick').value = o?.customer && [...$('customerQuick').options].some(option => option.value === o.customer) ? o.customer : '';
   setPricingMode(o?.pricingMode || (o ? 'legacy' : 'allin'));
@@ -212,6 +238,8 @@ if ($('search')) $('search').oninput = render;
 if ($('pricingMode')) $('pricingMode').onchange = e => setPricingMode(e.target.value);
 if ($('customer')) $('customer').oninput = e => applyCustomerPricing(e.target.value);
 if ($('customerQuick')) $('customerQuick').onchange = e => { if (!e.target.value) return; $('customer').value = e.target.value; applyCustomerPricing(e.target.value); };
+if ($('costRate')) $('costRate').addEventListener('input', () => { $('costRate').dataset.userEdited = 'true'; });
+if ($('refreshRate')) $('refreshRate').onclick = () => { if ($('costRate')) $('costRate').dataset.userEdited = ''; refreshLiveRate(); };
 if ($('backdrop')) $('backdrop').onclick = e => { if (e.target === $('backdrop')) close(); };
 if ($('orderForm')) $('orderForm').onsubmit = async e => {
   e.preventDefault();
@@ -251,4 +279,5 @@ async function initCloud() {
 initCloud();
 renderFilters();
 ['status','customerQuick','pricingMode'].forEach(id => setupGlassSelect($(id)));
+refreshLiveRate();
 
